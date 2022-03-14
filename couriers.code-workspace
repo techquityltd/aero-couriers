@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../sites/aero-test-store"
+		},
+		{
+			"path": "../aero-fulfillment-drivers"
+		}
+	],
+    "settings": {}
+}

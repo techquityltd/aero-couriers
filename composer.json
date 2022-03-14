@@ -1,0 +1,57 @@
+{
+    "name": "techquity/aero-couriers",
+    "description": "",
+    "keywords": [
+        "techquity",
+        "aero-couriers"
+    ],
+    "homepage": "https://github.com/techquity/aero-couriers",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Kristen Colquhoun",
+            "email": "kristen.colquhoun@techquity.co.uk",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.4|^8.0",
+        "aerocommerce/admin": "^1.6.3",
+        "aerocommerce/core": "^0",
+        "guzzlehttp/guzzle": "^6.3.1|^7.0.1",
+        "illuminate/support": "^6.0",
+        "iio/libmergepdf": "^4.0",
+        "techquity/aero-order-documents": "^1.1.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Techquity\\Aero\\Couriers\\": "src"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Techquity\\Aero\\Couriers\\CouriersServiceProvider"
+            ],
+            "aliases": {
+                "Courier": "Techquity\\Aero\\Couriers\\Facades\\Courier"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://agora.aerocommerce.com"
+        },
+        {
+            "type": "composer",
+            "url": "https://packages.aerocommerce.com"
+        }
+    ]
+}
