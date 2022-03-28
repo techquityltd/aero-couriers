@@ -1,6 +1,6 @@
 <?php
 
-namespace Techquity\Aero\Couriers\Services\Fedex\Factories;
+namespace Techquity\Aero\Couriers\Services\FedEx\Factories;
 
 use Aero\Fulfillment\Models\Fulfillment;
 use Illuminate\Support\Arr;

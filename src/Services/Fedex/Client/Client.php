@@ -1,6 +1,6 @@
 <?php
 
-namespace Techquity\Aero\Couriers\Services\Fedex\Client;
+namespace Techquity\Aero\Couriers\Services\FedEx\Client;
 
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
