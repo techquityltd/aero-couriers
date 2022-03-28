@@ -1,6 +1,6 @@
 <?php
 
-namespace Techquity\Aero\Couriers\Services\Fedex;
+namespace Techquity\Aero\Couriers\Services\FedEx;
 
 use Aero\Fulfillment\Models\Fulfillment;
 use Techquity\Aero\Couriers\Client\Response;
