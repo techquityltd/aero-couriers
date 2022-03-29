@@ -110,6 +110,9 @@ class FedExDriver extends AbstractCourierDriver
                         'data' => ['code' => $response->get('errors')]
                     ]);
                 });
+        } else {
+            $this->fulfillment->state = Fulfillment::CANCELED;
+            $this->fulfillment->save();
         }
     }
 
