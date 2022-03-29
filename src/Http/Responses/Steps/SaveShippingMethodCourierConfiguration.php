@@ -11,7 +11,6 @@ class SaveShippingMethodCourierConfiguration implements ResponseStep
     {
         $shippingMethod = $builder->method;
 
-        $shippingMethod->courier = $builder->request->input('courier');
         $shippingMethod->courier_configuration = json_encode($builder->request->input('configuration'));
         $shippingMethod->save();
 
