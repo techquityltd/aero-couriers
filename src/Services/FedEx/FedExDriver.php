@@ -109,6 +109,8 @@ class FedExDriver extends AbstractCourierDriver
                         'message' => 'Shipment failed to cancel',
                         'data' => ['code' => $response->get('errors')]
                     ]);
+                    $this->fulfillment->state = Fulfillment::FAILED;
+                    $this->fulfillment->save();
                 });
         } else {
             $this->fulfillment->state = Fulfillment::CANCELED;
