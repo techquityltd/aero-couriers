@@ -55,6 +55,9 @@ class FedExDriver extends AbstractCourierDriver
                     ]);
                 });
 
+                $this->fulfillment->state = Fulfillment::FAILED;
+                $this->fulfillment->save();
+
                 return $response;
             })
             ->onSuccessful(function (Response $response) {
