@@ -9,7 +9,7 @@
           :name="`configuration[${courier}][${label}][amount]`"
           v-model="numberOfParcels"
           class="w-full"
-          :disabled="locked"
+          :disabled="locked === 'true'"
           required
         />
       </div>
@@ -24,7 +24,7 @@
           class="w-full"
           v-model="parcelWeights[index]"
           :name="`configuration[${courier}][${label}][weights][${index}]`"
-          :disabled="locked"
+          :disabled="locked === 'true'"
           required
         />
         <label v-html="weightUnit" />

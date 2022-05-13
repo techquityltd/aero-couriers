@@ -41,7 +41,7 @@
     @endphp
     <div class="w-full px-2 mb-4">
         @if ($type === 'special.parcels')
-            <split-consignment courier="{{ $courier }}" label="{{ $label }}" weight-unit="{{ setting('courier.default_weight', 'g') }}" :parcels="{{ json_encode(old("configuration.{$courier}.{$label}", isset($fulfillment) ? $fulfillment->courierConfig('parcels', $method->courier, $parcels) : $parcels)) }}" />
+            <split-consignment courier="{{ $courier }}" label="{{ $label }}" locked="{{ isset($fulfillment) && $fulfillment->state === 'open' ? true : false }}" weight-unit="{{ setting('courier.default_weight', 'g') }}" :parcels="{{ json_encode(old("configuration.{$courier}.{$label}", isset($fulfillment) ? $fulfillment->courierConfig('parcels', $method->courier, $parcels) : $parcels)) }}" />
         @endif
     </div>
 
