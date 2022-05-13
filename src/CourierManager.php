@@ -4,6 +4,7 @@ namespace Techquity\Aero\Couriers;
 
 use Aero\Fulfillment\Models\Fulfillment;
 use Illuminate\Container\Container;
+use Illuminate\Support\Collection;
 use Techquity\Aero\Couriers\Services\AbstractCourierDriver;
 use Techquity\Aero\Couriers\Services\FedEx\FedExDriver;
 
@@ -49,6 +50,14 @@ class CourierManager
         }
 
         // throw something
+    }
+
+    /**
+     * Get the configuration for each fulfillment.
+     */
+    public function getFulfillmentConfiguration($courier)
+    {
+        return collect($this->drivers)->get($courier)()->fulfillmentConfiguration();
     }
 
     /**

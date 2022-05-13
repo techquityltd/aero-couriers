@@ -4,6 +4,7 @@ namespace Techquity\Aero\Couriers\Services\FedEx\Factories;
 
 use Aero\Fulfillment\Models\Fulfillment;
 use Illuminate\Support\Arr;
+use Techquity\Aero\Couriers\Services\FedEx\FedExDriver;
 
 class ShipmentFactory
 {
@@ -93,18 +94,11 @@ class ShipmentFactory
     /**
      * Get the total weight of the shipment.
      */
-    protected function getTotalWeight($unit = 'lbs', $min = 1000): float
+    protected function getTotalWeight(): float
     {
-        $totalWeight = $this->fulfillment->weight > $min ? $this->fulfillment->weight : $min;
-
-        switch (strtolower($unit)) {
-            case 'lbs':
-                return $totalWeight * 0.0022046;
-            case 'kg':
-                return $totalWeight / 100;
-            default:
-                return $totalWeight * 0.0022046;
-        }
+        return collect($this->fulfillment->courierConfig('parcels.weights', FedExDriver::NAME, [
+            1
+        ]))->sum();
     }
 
     /**
@@ -141,14 +135,21 @@ class ShipmentFactory
 
     protected function getRequestedPackageLineItems(): array
     {
-        return [
-            [
+        $this->fulfillment->update([
+            'state' => 'open'
+        ]);
+
+        $weightUnit = strtoupper(setting('courier.default_weight', 'g'));
+        return collect($this->fulfillment->courierConfig('parcels.weights', FedExDriver::NAME, [
+            1
+        ]))->map(function ($weight) use ($weightUnit) {
+            return [
                 'weight' => [
-                    'units' => 'KG',
-                    'value' => $this->getTotalWeight('KG'),
+                    'units' => $weightUnit,
+                    'value' => $weight,
                     'imageType' => 'PDF',
                 ]
-            ]
-        ];
+            ];
+        })->values()->toArray();
     }
 }

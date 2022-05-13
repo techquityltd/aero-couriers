@@ -8,10 +8,13 @@ use Aero\Admin\Http\Responses\Configuration\AdminFulfillmentMethodStore;
 use Aero\Admin\Http\Responses\Configuration\AdminFulfillmentMethodUpdate;
 use Aero\Admin\Http\Responses\Configuration\AdminShippingMethodStore;
 use Aero\Admin\Http\Responses\Configuration\AdminShippingMethodUpdate;
+use Aero\Admin\Http\Responses\Orders\AdminOrderFulfillmentStore;
+use Aero\Admin\Http\Responses\Orders\AdminOrderFulfillmentUpdate;
 use Aero\Admin\ResourceLists\FulfillmentsResourceList;
 use Aero\Admin\ResourceLists\OrdersResourceList;
 use Aero\Cart\Models\ShippingMethod;
 use Aero\Common\Facades\Settings;
+use Aero\Common\Providers\ModuleServiceProvider;
 use Aero\Common\Settings\SettingGroup;
 use Aero\Fulfillment\Models\Fulfillment;
 use Aero\Fulfillment\Models\FulfillmentMethod;
@@ -22,13 +25,15 @@ use Techquity\Aero\Couriers\BulkActions\CreateFulfillmentsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\DeleteFulfillmentsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\DownloadLabelsBulkAction;
 use Techquity\Aero\Couriers\Facades\Courier;
+use Techquity\Aero\Couriers\Http\Middleware\ValidateFulfillmentCourierConfiguration;
 use Techquity\Aero\Couriers\Http\Middleware\ValidateFulfillmentMethodCourierConfiguration;
 use Techquity\Aero\Couriers\Http\Middleware\ValidateShippingMethodCourierConfiguration;
+use Techquity\Aero\Couriers\Http\Responses\Steps\SaveFulfillmentCourierConfiguration;
 use Techquity\Aero\Couriers\Http\Responses\Steps\SaveFulfillmentMethodCourierConfiguration;
 use Techquity\Aero\Couriers\Http\Responses\Steps\SaveShippingMethodCourierConfiguration;
 use Techquity\Aero\Couriers\Models\FulfillmentLog;
 
-class CouriersServiceProvider extends ServiceProvider
+class CouriersServiceProvider extends ModuleServiceProvider
 {
     /**
      * Register any application services.
@@ -54,6 +59,8 @@ class CouriersServiceProvider extends ServiceProvider
             $group->boolean('automatic_process')
                 ->label('Process fulfillments automatically after creating fulfillments.')
                 ->default(false);
+
+            $group->string('default_weight')->in(['g', 'kg'])->default('g');
         });
 
         Relation::morphMap([
@@ -62,6 +69,7 @@ class CouriersServiceProvider extends ServiceProvider
 
         $this->extendFulfillmentMethodConfiguration();
         $this->extendShippingMethodConfiguration();
+        $this->extendFulfillment();
         $this->addLoggingToFulfillments();
 
         BulkAction::create(CreateFulfillmentsBulkAction::class, OrdersResourceList::class)
@@ -81,6 +89,39 @@ class CouriersServiceProvider extends ServiceProvider
             ->permissions('fulfillments.view');
     }
 
+    protected function extendFulfillment()
+    {
+        $fulfillmentConfiguration = (function ($data) {
+            if (!isset($data['methods'])) {
+                $data['methods'] = collect([$data['fulfillment']->method]);
+            }
+            $data['methods']->map(function ($method) {
+                if ($method->courier) {
+                    $method->fulfillmentConfiguration = Courier::getFulfillmentConfiguration($method->courier);
+                }
+                return $method;
+            });
+
+            return view('courier::fulfillments.configuration', $data);
+        });
+
+        AdminSlot::inject('orders.fulfillment.new.extra.info', $fulfillmentConfiguration);
+        AdminSlot::inject('orders.fulfillment.edit.cards', $fulfillmentConfiguration);
+
+        Fulfillment::makeFillable('courier_configuration');
+        Fulfillment::macro('courierConfig', function ($key = null, $courier = null, $default = null) {
+            $decoded = data_get(json_decode($this->courier_configuration, true), $courier ?? $this->courier, []);
+
+            return $key ? data_get($decoded, $key, $default) : $decoded;
+        });
+
+        AdminOrderFulfillmentUpdate::middleware(ValidateFulfillmentCourierConfiguration::class);
+        AdminOrderFulfillmentStore::middleware(ValidateFulfillmentCourierConfiguration::class);
+
+        AdminOrderFulfillmentUpdate::extend(SaveFulfillmentCourierConfiguration::class);
+        AdminOrderFulfillmentStore::extend(SaveFulfillmentCourierConfiguration::class);
+    }
+
     protected function extendFulfillmentMethodConfiguration()
     {
         $fulfillmentConfiguration = (function ($data) {
@@ -97,7 +138,6 @@ class CouriersServiceProvider extends ServiceProvider
         FulfillmentMethod::makeFillable(['courier', 'courierConfig']);
 
         FulfillmentMethod::macro('courierConfig', function ($key = null, $courier = null) {
-
             $decoded = data_get(json_decode($this->courier_configuration, true), $courier ?? $this->courier, []);
 
             return $key ? data_get($decoded, $key) : $decoded;
@@ -145,5 +185,12 @@ class CouriersServiceProvider extends ServiceProvider
         });
 
         AdminSlot::inject('orders.fulfillment.edit.cards', 'courier::fulfillments.logs');
+    }
+
+    public function assetLinks()
+    {
+        return [
+            'techquity/couriers' => __DIR__ . '/../public',
+        ];
     }
 }

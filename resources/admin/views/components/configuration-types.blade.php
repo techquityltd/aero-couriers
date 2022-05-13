@@ -22,18 +22,33 @@
         @endif
 
         @if (is_array($type))
-            @isset ($type['select'])
+            @isset($type['select'])
                 <div class="px-2 mb-4">
                     <label for="{{ $label }}" class="block">{{ str_replace('_', ' ', Str::title($label)) }}</label>
                     <div class="select w-full">
                         <select id="{{ $label }}" name="configuration[{{ $courier }}][{{ $label }}]" class="w-full">
-                            @foreach($type['select'] as $option)
+                            @foreach ($type['select'] as $option)
                                 <option value="{{ $option }}" {{ old("configuration.{$courier}.{$label}", $model ? $model->courierConfig($label, $courier) : '') === $option ? 'selected' : '' }}>{{ $option }}</option>
                             @endforeach
                         </select>
                     </div>
                 </div>
             @endif
+    @endif
+    </div>
+    @php
+        $parcels = ['amount' => 1, 'weights' => []];
+    @endphp
+    <div class="w-full px-2 mb-4">
+        @if ($type === 'special.parcels')
+            <split-consignment courier="{{ $courier }}" label="{{ $label }}" weight-unit="{{ setting('courier.default_weight', 'g') }}" :parcels="{{ json_encode(old("configuration.{$courier}.{$label}", isset($fulfillment) ? $fulfillment->courierConfig('parcels', $method->courier, $parcels) : $parcels)) }}" />
         @endif
     </div>
-@endforeach
+
+    @push('scripts')
+        <script src="{{ asset(mix('components.js', 'modules/techquity/couriers')) }}"></script>
+        <script>
+            window.AeroAdmin.vue.use(window.couriersComponents);
+        </script>
+    @endpush
+    @endforeach

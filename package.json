@@ -1,0 +1,16 @@
+{
+    "private": true,
+    "scripts": {
+        "dev": "npm run development",
+        "development": "mix",
+        "prod": "npm run production",
+        "production": "mix --production",
+        "watch": "mix watch"
+    },
+    "devDependencies": {
+        "laravel-mix": "^6.0.9",
+        "vue": "^2.6.12",
+        "vue-loader": "^15.9.6",
+        "vue-template-compiler": "^2.6.14"
+    }
+}

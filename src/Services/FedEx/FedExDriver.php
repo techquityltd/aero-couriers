@@ -12,6 +12,7 @@ use Techquity\Aero\Couriers\Services\FedEx\Installation\FulfillmentMethodConfigu
 use Techquity\Aero\Couriers\Services\FedEx\Installation\ShippingMethodConfiguration;
 use Techquity\Aero\OrderDocuments\Models\OrderDocumentGroup;
 use Illuminate\Support\Str;
+use Techquity\Aero\Couriers\Services\FedEx\Installation\FulfillmentConfiguration;
 
 class FedExDriver extends AbstractCourierDriver
 {
@@ -21,7 +22,7 @@ class FedExDriver extends AbstractCourierDriver
     public const NAME = 'fedex';
 
     /**
-     * Create a new fulfillment setup instance.
+     * Create a new fulfillment method setup instance.
      */
     public function fulfillmentMethodConfiguration()
     {
@@ -29,11 +30,19 @@ class FedExDriver extends AbstractCourierDriver
     }
 
     /**
-     * Create a new fulfillment setup instance.
+     * Create a new shipping method setup instance.
      */
     public function shippingMethodConfiguration()
     {
         return new ShippingMethodConfiguration();
+    }
+
+    /**
+     * Create a new fulfillment setup instance.
+     */
+    public function fulfillmentConfiguration()
+    {
+        return new FulfillmentConfiguration();
     }
 
     /**
@@ -138,14 +147,21 @@ class FedExDriver extends AbstractCourierDriver
             'key' => 'fedex_labels_' . Str::random(8)
         ]);
 
-        $orderDocument = $this->order()->documents()->firstOrCreate([
-            'key' => 'label_fedex_' . $this->fulfillment->reference,
-        ], [
-            'group_id' => $group->id,
-        ]);
+        $labels = collect($response->get('output.transactionShipments.0.pieceResponses'));
 
-        $orderDocument->createBase64Document(
-            $response->get('output.transactionShipments.0.pieceResponses.0.packageDocuments.0.encodedLabel')
-        );
+        $labels->each(function ($label) use ($group) {
+            $orderDocument = $this->order()->documents()->firstOrCreate([
+                'key' => "label_fedex_{$label->packageSequenceNumber}_{$this->fulfillment->reference}",
+            ], [
+                'group_id' => $group->id,
+            ]);
+            $orderDocument->createBase64Document(
+                data_get($label, 'packageDocuments.0.encodedLabel')
+            );
+        });
+
+        $group->update([
+            'complete' => true
+        ]);
     }
 }

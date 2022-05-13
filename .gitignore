@@ -1,1 +1,7 @@
-vendor
+.DS_Store
+/.idea
+/.vscode
+/.vagrant
+/vendor
+/node_modules
+composer.lock
