@@ -1,4 +1,4 @@
-@if($methods->whereNotNull('fulfillmentConfiguration'))
+@if($methods->whereNotNull('fulfillmentConfiguration')->count())
     <input type="hidden" id="selectedCourier" name="courier" value="{{ old('courier', $methods->first()->courier) }}" />
     <div id="courier-configuration" class="card mb-4 w-full hidden [ aero-accordion ]" data-section="courier-options">
         <input type="checkbox" id="courierOptionsOpen" aria-hidden="true">
