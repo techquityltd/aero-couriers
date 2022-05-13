@@ -37,7 +37,7 @@
     @endif
     </div>
     @php
-        $parcels = ['amount' => 1, 'weights' => []];
+        $parcels = ['amount' => 1, 'weights' => [1 => $order->weight]];
     @endphp
     <div class="w-full px-2 mb-4">
         @if ($type === 'special.parcels')
