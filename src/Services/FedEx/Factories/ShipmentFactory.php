@@ -146,7 +146,7 @@ class ShipmentFactory
             return [
                 'weight' => [
                     'units' => $weightUnit,
-                    'value' => $weight,
+                    'value' => (float) $weight,
                     'imageType' => 'PDF',
                 ]
             ];
