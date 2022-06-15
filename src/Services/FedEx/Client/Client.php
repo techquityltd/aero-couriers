@@ -68,7 +68,7 @@ class Client
      */
     protected function getBaseUri()
     {
-        return $this->config['server'] === 'production' ? $this->productionEndpoint : $this->sandboxEndpoint;
+        return strtolower($this->config['server']) === strtolower('production') ? $this->productionEndpoint : $this->sandboxEndpoint;
     }
 
     /**
