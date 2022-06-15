@@ -139,13 +139,12 @@ class ShipmentFactory
             'state' => 'open'
         ]);
 
-        $weightUnit = strtoupper(setting('courier.default_weight', 'g'));
         return collect($this->fulfillment->courierConfig('parcels.weights', FedExDriver::NAME, [
             1
-        ]))->map(function ($weight) use ($weightUnit) {
+        ]))->map(function ($weight) {
             return [
                 'weight' => [
-                    'units' => $weightUnit,
+                    'units' => 'KG',
                     'value' => (float) $weight,
                     'imageType' => 'PDF',
                 ]
