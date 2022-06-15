@@ -150,8 +150,13 @@ class FedExDriver extends AbstractCourierDriver
         $labels = collect($response->get('output.transactionShipments.0.pieceResponses'));
 
         $labels->each(function ($label) use ($group) {
+
             $orderDocument = $this->order()->documents()->firstOrCreate([
-                'key' => "label_fedex_{$label->packageSequenceNumber}_{$this->fulfillment->reference}",
+                'key' => sprintf(
+                    "label_fedex_%s_%s",
+                    $label->packageSequenceNumber ?? 1,
+                    $this->fulfillment->reference
+                ),
             ], [
                 'group_id' => $group->id,
             ]);

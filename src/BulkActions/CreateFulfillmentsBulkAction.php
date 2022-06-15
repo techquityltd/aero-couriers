@@ -27,8 +27,6 @@ class CreateFulfillmentsBulkAction extends BulkActionJob
 
     public function handle(): void
     {
-        $order = $this->list->items()->first();
-
         $this->list->items()
             ->filter(fn (Order $order) => (bool) $order->shippingMethod)
             ->filter(fn (Order $order) => $order->shippingMethod->fulfillmentMethods()->count() === 1)

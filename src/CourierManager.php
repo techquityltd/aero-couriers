@@ -4,7 +4,6 @@ namespace Techquity\Aero\Couriers;
 
 use Aero\Fulfillment\Models\Fulfillment;
 use Illuminate\Container\Container;
-use Illuminate\Support\Collection;
 use Techquity\Aero\Couriers\Services\AbstractCourierDriver;
 use Techquity\Aero\Couriers\Services\FedEx\FedExDriver;
 

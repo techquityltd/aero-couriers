@@ -19,11 +19,12 @@ use Aero\Common\Settings\SettingGroup;
 use Aero\Fulfillment\Models\Fulfillment;
 use Aero\Fulfillment\Models\FulfillmentMethod;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
 use Techquity\Aero\Couriers\BulkActions\CancelFulfillmentsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\CreateFulfillmentsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\DeleteFulfillmentsBulkAction;
+use Techquity\Aero\Couriers\BulkActions\DispatchOrdersBulkAction;
 use Techquity\Aero\Couriers\BulkActions\DownloadLabelsBulkAction;
+use Techquity\Aero\Couriers\BulkActions\PrintShippingLabelsBulkAction;
 use Techquity\Aero\Couriers\Facades\Courier;
 use Techquity\Aero\Couriers\Http\Middleware\ValidateFulfillmentCourierConfiguration;
 use Techquity\Aero\Couriers\Http\Middleware\ValidateFulfillmentMethodCourierConfiguration;
@@ -72,8 +73,16 @@ class CouriersServiceProvider extends ModuleServiceProvider
         $this->extendFulfillment();
         $this->addLoggingToFulfillments();
 
+        BulkAction::create(DispatchOrdersBulkAction::class, OrdersResourceList::class)
+            ->title('Dispatch Fulfillments')
+            ->permissions('orders.edit');
+
         BulkAction::create(CreateFulfillmentsBulkAction::class, OrdersResourceList::class)
             ->title('Create Fulfillments')
+            ->permissions('orders.edit');
+
+        BulkAction::create(PrintShippingLabelsBulkAction::class, OrdersResourceList::class)
+            ->title('Print Shipping Labels')
             ->permissions('orders.edit');
 
         BulkAction::create(CancelFulfillmentsBulkAction::class, FulfillmentsResourceList::class)
@@ -85,7 +94,7 @@ class CouriersServiceProvider extends ModuleServiceProvider
             ->permissions('fulfillments.view');
 
         BulkAction::create(DownloadLabelsBulkAction::class, FulfillmentsResourceList::class)
-            ->title('Download Labels')
+            ->title('Print Labels')
             ->permissions('fulfillments.view');
     }
 
