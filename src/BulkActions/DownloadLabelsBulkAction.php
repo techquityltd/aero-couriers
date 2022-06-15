@@ -20,32 +20,31 @@ class DownloadLabelsBulkAction extends BulkActionJob
     {
         $this->list = $list;
         $this->admin = auth()->user()->name;
-        $this->downloadName = Str::random(5);
+        $this->labelGroup = Str::random();
     }
 
-    public function handle()
+    public function handle(): void
     {
         $merger = new Merger();
 
-        $this->list->items()->each(function (Fulfillment $fulfillment) use ($merger) {
+        $this->list->items()
+            ->each(function (Fulfillment $fulfillment) use ($merger) {
 
-            $key = "label_{$fulfillment->method->courier}_{$fulfillment->reference}";
+                $fulfillment->items->first()->order->documents
+                    ->filter(fn ($document) => (Str::startsWith($document->key, 'label_')))
+                    ->reject(fn ($document) => ($document->failed))
+                    ->each(function ($document) use ($merger) {
+                        $merger->addRaw(
+                            Storage::disk('local')->get(sprintf(OrderDocumentTemplate::$path . 'orders/%s.pdf', $document->key))
+                        );
+                    });
+            });
 
-            if (Storage::disk('local')->exists(OrderDocumentTemplate::$path . "orders/{$key}.pdf")) {
-                $merger->addRaw(
-                    Storage::disk('local')->get(sprintf(OrderDocumentTemplate::$path . "orders/{$key}.pdf"))
-                );
-            }
-        });
-
-        Storage::disk('local')->put(OrderDocumentTemplate::$path . "temp/{$this->downloadName}.pdf", $merger->merge());
+        Storage::disk('local')->put(OrderDocumentTemplate::$path . "temp/labels/{$this->labelGroup}.pdf", $merger->merge());
     }
 
-    /**
-     * The successful response to return.
-     */
     public function response()
     {
-        return Storage::disk('local')->download(OrderDocumentTemplate::$path . "temp/{$this->downloadName}.pdf");
+        return Storage::disk('local')->download(OrderDocumentTemplate::$path . "temp/labels/{$this->labelGroup}.pdf");
     }
 }
