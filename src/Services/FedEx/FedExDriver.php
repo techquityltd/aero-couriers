@@ -98,9 +98,10 @@ class FedExDriver extends AbstractCourierDriver
             (new Client($this->configuration))
                 ->put('ship/v1/shipments/cancel', ['json' => [
                     'accountNumber' => [
-                        'value' => 'Your account number'
+                        'value' => $this->configuration['account_number'],
                     ],
                     'trackingNumber' => $this->fulfillment->tracking_url,
+                    'deletionControl' => 'DELETE_ALL_PACKAGES',
                 ]])
                 ->onSuccessful(function ($response) {
                     $this->fulfillment->state = Fulfillment::CANCELED;
