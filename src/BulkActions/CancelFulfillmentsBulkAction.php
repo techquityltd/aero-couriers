@@ -7,7 +7,6 @@ use Aero\Admin\ResourceLists\FulfillmentsResourceList;
 use Aero\Fulfillment\Models\Fulfillment;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Techquity\Aero\Couriers\Facades\Courier;
-use Techquity\Aero\Couriers\Models\FulfillmentLog;
 
 class CancelFulfillmentsBulkAction extends BulkActionJob implements ShouldQueue
 {
