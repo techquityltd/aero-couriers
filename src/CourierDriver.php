@@ -33,7 +33,7 @@ class CourierDriver extends FulfillmentDriver
      */
     public function handle(): Response
     {
-        $admin = auth()->user()->name;
+        $admin = optional(auth()->user())->name;
 
         $this->fulfillments->each(function ($fulfillment) use ($admin) {
             if (in_array($fulfillment->state, [
