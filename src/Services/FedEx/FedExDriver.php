@@ -74,11 +74,11 @@ class FedExDriver extends AbstractCourierDriver
 
                 $this->fulfillment->tracking_code = $trackingCode;
                 $this->fulfillment->tracking_url = $this->getTrackingUrl($trackingCode);
-                $this->fulfillment->state = Fulfillment::SUCCESSFUL;
+                $this->fulfillment->state = 'pushed';
                 $this->fulfillment->save();
 
                 $this->fulfillment->logs()->create([
-                    'type' => FulfillmentLog::SUCCESS,
+                    'type' => 'pushed',
                     'title' => $response->get('transactionId'),
                     'message' => 'Shipment successfully created',
                     'data' => ['code' => $response->get('code')]
@@ -151,7 +151,6 @@ class FedExDriver extends AbstractCourierDriver
         $labels = collect($response->get('output.transactionShipments.0.pieceResponses'));
 
         $labels->each(function ($label) use ($group) {
-
             $orderDocument = $this->order()->documents()->firstOrCreate([
                 'key' => sprintf(
                     "label_fedex_%s_%s",

@@ -29,7 +29,6 @@ class DownloadLabelsBulkAction extends BulkActionJob
 
         $this->list->items()
             ->each(function (Fulfillment $fulfillment) use ($merger) {
-
                 $fulfillment->items->first()->order->documents
                     ->filter(fn ($document) => (Str::startsWith($document->key, 'label_')))
                     ->reject(fn ($document) => ($document->failed))
@@ -41,6 +40,12 @@ class DownloadLabelsBulkAction extends BulkActionJob
             });
 
         Storage::disk('local')->put(OrderDocumentTemplate::$path . "temp/labels/{$this->labelGroup}.pdf", $merger->merge());
+
+        $this->list->items()
+            ->filter(fn ($fulfillment) => $fulfillment->state === 'pushed')
+            ->each(function ($fulfillment) {
+                $fulfillment->update(['state' => Fulfillment::SUCCESSFUL]);
+            });
     }
 
     public function response()

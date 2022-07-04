@@ -5,6 +5,7 @@ namespace Techquity\Aero\Couriers\BulkActions;
 use Aero\Admin\Jobs\BulkActionJob;
 use Aero\Admin\ResourceLists\OrdersResourceList;
 use Aero\Cart\Models\Order;
+use Aero\Fulfillment\Models\Fulfillment;
 use iio\libmergepdf\Merger;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -40,6 +41,11 @@ class PrintShippingLabelsBulkAction extends BulkActionJob
             });
 
         Storage::disk('local')->put(OrderDocumentTemplate::$path . "temp/labels/{$this->labelGroup}.pdf", $merger->merge());
+
+        $this->list->items()
+            ->each(function ($order) {
+                $order->fulfillments->where('state', 'pushed')->each->update(['state' => Fulfillment::SUCCESSFUL]);
+            });
     }
 
     public function response()
