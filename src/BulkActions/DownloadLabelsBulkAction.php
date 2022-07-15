@@ -31,6 +31,7 @@ class DownloadLabelsBulkAction extends BulkActionJob
             ->each(function (Fulfillment $fulfillment) use ($merger) {
                 $fulfillment->items->first()->order->documents
                     ->filter(fn ($document) => (Str::startsWith($document->key, 'label_')))
+                    ->filter(fn ($document) => (Str::contains($document->key, $fulfillment->reference)))
                     ->reject(fn ($document) => ($document->failed))
                     ->each(function ($document) use ($merger) {
                         $merger->addRaw(
