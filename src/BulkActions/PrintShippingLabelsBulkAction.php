@@ -32,7 +32,7 @@ class PrintShippingLabelsBulkAction extends BulkActionJob
             ->each(function (Order $order) use ($merger) {
                 $order->documents
                     ->filter(fn ($document) => (Str::startsWith($document->key, 'label_')))
-                    ->filter(fn ($document) => (Str::contains($document->key, $order->fulfillments->latest()->reference)))
+                    ->filter(fn ($document) => (Str::contains($document->key, $order->fulfillments->last()->reference)))
                     ->reject(fn ($document) => ($document->failed))
                     ->each(function ($document) use ($merger) {
                         $merger->addRaw(
