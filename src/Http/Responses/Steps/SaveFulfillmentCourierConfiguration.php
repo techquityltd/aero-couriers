@@ -2,6 +2,7 @@
 
 namespace Techquity\Aero\Couriers\Http\Responses\Steps;
 
+use Aero\Fulfillment\Models\Fulfillment;
 use Aero\Responses\ResponseBuilder;
 use Aero\Responses\ResponseStep;
 
@@ -13,6 +14,15 @@ class SaveFulfillmentCourierConfiguration implements ResponseStep
 
         if (!$fulfillment) {
             $fulfillment = $builder->order->fulfillments()->latest()->first();
+        }
+
+        // Reopen fulfillments..
+        if (in_array($fulfillment->state, [
+                    Fulfillment::PENDING,
+                    Fulfillment::FAILED,
+                    Fulfillment::CANCELED,
+                ])) {
+            $fulfillment->state = Fulfillment::OPEN;
         }
 
         $fulfillment->courier_configuration = json_encode($builder->request->input('configuration'));

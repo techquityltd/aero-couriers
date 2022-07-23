@@ -35,10 +35,7 @@
         "laravel": {
             "providers": [
                 "Techquity\\Aero\\Couriers\\CouriersServiceProvider"
-            ],
-            "aliases": {
-                "Courier": "Techquity\\Aero\\Couriers\\Facades\\Courier"
-            }
+            ]
         }
     },
     "minimum-stability": "dev",

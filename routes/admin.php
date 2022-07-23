@@ -1,13 +1,35 @@
 <?php
 
-use Techquity\Aero\Couriers\CouriersManager;
 
-Route::post('courier/options/{driver?}', function ($driver = null) {
-    if (!$driver) return;
+use Aero\Fulfillment\FulfillmentProcessor;
+use Aero\Fulfillment\Models\Fulfillment;
+use Aero\Fulfillment\Models\FulfillmentMethod;
+use Techquity\Aero\Couriers\CourierConfiguration;
 
-    $driver = app(CouriersManager::class)->driver($driver);
+Route::post('courier/configuration/{courier?}/{method?}', function ($courier, FulfillmentMethod $method = null) {
+    $configuration = new CourierConfiguration($courier, $method);
 
-    dd(app($driver)->setup()->options());
+    if ($configuration->isValid()) {
+        $data['configuration'] = [
+            'key' => $configuration->key(),
+            'group' => $configuration->group(),
+            'settings' => $configuration->settings()
+        ];
 
-    return view('courier.fulfillments::fulfillment-driver-setup', compact('options'))->render();
-})->name('courier.fulfillments.setup');
+        return view('courier::configuration', $data)->render();
+    }
+})->name('courier.fulfillment-method-config');
+
+Route::post('courier/fulfillment/{method?}/{fulfillment?}', function (FulfillmentMethod $method, Fulfillment $fulfillment = null) {
+    $configuration = new CourierConfiguration($method->driver, $method);
+
+    if ($configuration->isValid()) {
+        $data['configuration'] = [
+            'key' => $configuration->key(),
+            'group' => $configuration->group(),
+            'settings' => $configuration->settings()
+        ];
+
+        return view('courier::configuration', $data)->render();
+    }
+})->name('courier.fulfillment-config');

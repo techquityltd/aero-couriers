@@ -10,7 +10,6 @@ class SaveShippingMethodCourierConfiguration implements ResponseStep
     public function handle(ResponseBuilder $builder, \Closure $next)
     {
         $shippingMethod = $builder->method;
-
         $shippingMethod->courier_configuration = json_encode($builder->request->input('configuration'));
         $shippingMethod->save();
 

@@ -10,7 +10,6 @@
     </div>
 
     <div class="[ aero-accordion-content ]">
-
         <div class="pt-4">
             @foreach ($couriers as $courier => $types)
                 <div data-courier-options data-courier="{{ $courier }}" class="@if (old('courier', $method->courier ?? null) !== $courier) hidden @endif">
