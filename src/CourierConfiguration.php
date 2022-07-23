@@ -4,13 +4,11 @@ namespace Techquity\Aero\Couriers;
 
 use Aero\Admin\Utils\SettingHelpers;
 use Aero\Common\Facades\Settings;
+use Aero\Common\Settings\Setting;
 use Aero\Common\Settings\SettingGroup;
 use Aero\Fulfillment\FulfillmentProcessor;
 use Aero\Fulfillment\Models\Fulfillment;
 use Aero\Fulfillment\Models\FulfillmentMethod;
-use Illuminate\Contracts\Validation\Validator as ValidationValidator;
-use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -18,6 +16,11 @@ use Illuminate\Support\Str;
 
 class CourierConfiguration
 {
+    /**
+     * The name for a method only setting.
+     */
+    public const METHOD_ONLY = 'method';
+
     /**
      * The settings group key.
      */
@@ -77,12 +80,25 @@ class CourierConfiguration
             $this->group = Settings::getGroup($this->key);
 
             $this->settings = Collection::make($this->group->settings()->all());
-        }
-    }
 
-    protected function attachFulfillmentSettings()
-    {
-        // useing aero settings add the customised values if any
+            if ($this->fulfillment) {
+                $this->settings = $this->settings->map(function (Setting $setting) {
+                    // Allow us to only have settings not configurable in the fulfillment.
+                    if ($setting->getSection() === static::METHOD_ONLY) {
+                        return null;
+                    }
+
+                    return $setting->value($this->fulfillment->courier_configuration[$setting->key()]);
+                })->filter();
+
+                /**
+                 * Must be a better way to do this, will need to speak with Aero.
+                 * For now to get the settings to work on the fulfilment page we need a file.
+                 */
+                Settings::save($this->key, SettingHelpers::formatDataForSaving($this->settings, $this->fulfillment->courier_configuration->toArray()));
+                Storage::delete("settings/{$this->key}.json");
+            }
+        }
     }
 
     /**
@@ -103,6 +119,10 @@ class CourierConfiguration
      */
     protected function generateKey(): string
     {
+        if ($this->fulfillment) {
+            return Str::slug("courier-fulfillment-{$this->fulfillment->id}");
+        }
+
         if ($this->fulfillmentMethod instanceof FulfillmentMethod) {
             return Str::slug("courier-fulfillment-method-{$this->fulfillmentMethod->id}");
         }
@@ -141,9 +161,8 @@ class CourierConfiguration
         $validator = $this->validate();
 
         if ($this->fulfillment) {
-            //$this->fulfillment->courierConfiguration
-            dd($validator->validated());
-            dd('save to the model, not the file');
+            $this->fulfillment->courierConfiguration = $this->fulfillment->courierConfiguration->merge($validator->validated());
+            $this->fulfillment->save();
 
             return;
         }

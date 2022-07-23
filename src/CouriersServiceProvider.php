@@ -6,8 +6,6 @@ use Aero\Admin\AdminSlot;
 use Aero\Admin\BulkAction;
 use Aero\Admin\Http\Responses\Configuration\AdminFulfillmentMethodStore;
 use Aero\Admin\Http\Responses\Configuration\AdminFulfillmentMethodUpdate;
-use Aero\Admin\Http\Responses\Configuration\AdminShippingMethodStore;
-use Aero\Admin\Http\Responses\Configuration\AdminShippingMethodUpdate;
 use Aero\Admin\Http\Responses\Orders\AdminOrderFulfillmentStore;
 use Aero\Admin\Http\Responses\Orders\AdminOrderFulfillmentUpdate;
 use Aero\Admin\ResourceLists\FulfillmentsResourceList;
@@ -29,11 +27,7 @@ use Techquity\Aero\Couriers\BulkActions\DispatchOrdersBulkAction;
 use Techquity\Aero\Couriers\BulkActions\DownloadLabelsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\PrintShippingLabelsBulkAction;
 use Techquity\Aero\Couriers\Http\Middleware\ValidateFulfillmentCourierConfiguration;
-use Techquity\Aero\Couriers\Http\Middleware\ValidateFulfillmentMethodCourierConfiguration;
-use Techquity\Aero\Couriers\Http\Middleware\ValidateShippingMethodCourierConfiguration;
 use Techquity\Aero\Couriers\Http\Responses\Steps\SaveFulfillmentCourierConfiguration;
-use Techquity\Aero\Couriers\Http\Responses\Steps\SaveFulfillmentMethodCourierConfiguration;
-use Techquity\Aero\Couriers\Http\Responses\Steps\SaveShippingMethodCourierConfiguration;
 use Techquity\Aero\Couriers\Models\FulfillmentLog;
 
 class CouriersServiceProvider extends ModuleServiceProvider
@@ -155,17 +149,33 @@ class CouriersServiceProvider extends ModuleServiceProvider
     {
         // Add required macros and attributes...
         Fulfillment::makeFillable('courier_configuration');
-        //Fulfillment::macro('courierConfiguration', CourierConfiguration::macroInjector());
-
-        // Maybe not need this
-        Fulfillment::macro('getShippingMethodAttribute', function (): ShippingMethod {
-            return $this->items->first()->order->shippingMethod;
+        Fulfillment::macro('getCourierConfigurationAttribute', function ($value) {
+            return collect(json_decode($value));
+        });
+        Fulfillment::macro('setCourierConfigurationAttribute', function ($value) {
+            $this->attributes['courier_configuration'] = json_encode($value->toArray());
         });
 
         AdminSlot::inject('orders.fulfillment.edit.cards', 'courier::fulfillments.configuration');
         AdminSlot::inject('orders.fulfillment.new.cards', 'courier::fulfillments.configuration');
 
         AdminOrderFulfillmentStore::middleware(function (Request $request, \Closure $next) {
+            $fulfillmentMethod = FulfillmentMethod::find($request->input('fulfillment_method'));
+
+            $configuration = new CourierConfiguration($fulfillmentMethod->driver, $fulfillmentMethod);
+
+            if ($configuration->isValid()) {
+                $validator = $configuration->validate();
+
+                if ($validator->fails()) {
+                    return back()->withErrors($validator)->withInput();
+                }
+            }
+
+            return $next($request);
+        });
+
+        AdminOrderFulfillmentUpdate::middleware(function (Request $request, \Closure $next) {
             $fulfillmentMethod = FulfillmentMethod::find($request->input('fulfillment_method'));
 
             $configuration = new CourierConfiguration($fulfillmentMethod->driver, $fulfillmentMethod);
@@ -188,32 +198,14 @@ class CouriersServiceProvider extends ModuleServiceProvider
                 $configuration->save();
             }
         });
-    }
 
-    protected function extendFulfillment()
-    {
+        AdminOrderFulfillmentUpdate::extend(function (ResponseBuilder $builder) {
+            $configuration = new CourierConfiguration($builder->fulfillment->method->driver, $builder->fulfillment->method, $builder->fulfillment);
 
-
-        // Add shipping method information to fulfillment screen...
-        AdminSlot::inject('orders.fulfillment.edit.extra.sidebar', 'courier::fulfillments.courier-information');
-
-        $fulfillmentConfiguration = (function (array $data) {
-            dd($data['fulfillment']);
-            if (!isset($data['methods'])) {
-                $data['methods'] = collect([$data['fulfillment']->method]);
+            if ($configuration->isValid()) {
+                $configuration->save();
             }
-
-            return view('courier::fulfillments.configuration', $data);
         });
-
-        AdminSlot::inject('orders.fulfillment.new.extra.info', $fulfillmentConfiguration);
-        AdminSlot::inject('orders.fulfillment.edit.cards', $fulfillmentConfiguration);
-
-        AdminOrderFulfillmentUpdate::middleware(ValidateFulfillmentCourierConfiguration::class);
-        AdminOrderFulfillmentStore::middleware(ValidateFulfillmentCourierConfiguration::class);
-
-        AdminOrderFulfillmentUpdate::extend(SaveFulfillmentCourierConfiguration::class);
-        AdminOrderFulfillmentStore::extend(SaveFulfillmentCourierConfiguration::class);
     }
 
 

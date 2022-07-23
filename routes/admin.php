@@ -21,7 +21,7 @@ Route::post('courier/configuration/{courier?}/{method?}', function ($courier, Fu
 })->name('courier.fulfillment-method-config');
 
 Route::post('courier/fulfillment/{method?}/{fulfillment?}', function (FulfillmentMethod $method, Fulfillment $fulfillment = null) {
-    $configuration = new CourierConfiguration($method->driver, $method);
+    $configuration = new CourierConfiguration($method->driver, $method, $fulfillment);
 
     if ($configuration->isValid()) {
         $data['configuration'] = [

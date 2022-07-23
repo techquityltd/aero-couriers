@@ -173,14 +173,19 @@ class UpsDriver extends AbstractCourierDriver
         $group->integer('default_length')
             ->hint('Default parcel length (cm)')
             ->max(100)
+            ->section('method')
             ->default(15);
 
         $group->integer('default_width')
             ->hint('Default parcel width (cm)')
+            ->max(100)
+            ->section('method')
             ->default(15);
 
         $group->integer('default_height')
             ->hint('Default parcel height (cm)')
+            ->max(100)
+            ->section('method')
             ->default(15);
     }
 
