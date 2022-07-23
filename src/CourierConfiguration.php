@@ -88,7 +88,7 @@ class CourierConfiguration
                         return null;
                     }
 
-                    return $setting->value($this->fulfillment->courier_configuration[$setting->key()]);
+                    return $setting->value($this->fulfillment->courier_configuration->{$setting->key()});
                 })->filter();
 
                 /**

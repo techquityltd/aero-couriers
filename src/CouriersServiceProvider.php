@@ -82,6 +82,17 @@ class CouriersServiceProvider extends ModuleServiceProvider
 
         // Settings unique to the courier...
         collect(config('couriers.drivers'))->each(fn ($driver) => $driver::courierSettings());
+
+        Fulfillment::macro('getCourierConfigurationAttribute', function ($value) {
+            if (!$this->courierModelConfiguration) {
+                $this->courierModelConfiguration = new CourierModelConfiguration(collect(json_decode($value)), $this);
+            }
+
+            return $this->courierModelConfiguration;
+        });
+        Fulfillment::macro('setCourierConfigurationAttribute', function ($value) {
+            $this->attributes['courier_configuration'] = json_encode($value->toArray());
+        });
     }
 
     /**
@@ -149,12 +160,6 @@ class CouriersServiceProvider extends ModuleServiceProvider
     {
         // Add required macros and attributes...
         Fulfillment::makeFillable('courier_configuration');
-        Fulfillment::macro('getCourierConfigurationAttribute', function ($value) {
-            return collect(json_decode($value));
-        });
-        Fulfillment::macro('setCourierConfigurationAttribute', function ($value) {
-            $this->attributes['courier_configuration'] = json_encode($value->toArray());
-        });
 
         AdminSlot::inject('orders.fulfillment.edit.cards', 'courier::fulfillments.configuration');
         AdminSlot::inject('orders.fulfillment.new.cards', 'courier::fulfillments.configuration');

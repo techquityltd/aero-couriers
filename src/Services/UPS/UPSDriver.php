@@ -12,6 +12,7 @@ use Techquity\Aero\Couriers\Services\Ups\Client\Client;
 use Techquity\Aero\Couriers\Services\Ups\Factories\ShipmentFactory;
 use Techquity\Aero\OrderDocuments\Models\OrderDocumentGroup;
 use Illuminate\Support\Str;
+use Techquity\Aero\Couriers\CourierConfiguration;
 use Techquity\Aero\Couriers\Services\AbstractCourierDriver;
 use Techquity\Aero\Couriers\Services\UPS\References\PackageTypes;
 use Techquity\Aero\Couriers\Services\UPS\References\ServiceCodes;
@@ -24,7 +25,7 @@ class UpsDriver extends AbstractCourierDriver
      */
     public const NAME = 'UPS';
 
-    public const KEY = '_ups';
+    public const SETTINGS = 'courier_ups';
 
     /**
      * Create a new consignment
@@ -173,19 +174,19 @@ class UpsDriver extends AbstractCourierDriver
         $group->integer('default_length')
             ->hint('Default parcel length (cm)')
             ->max(100)
-            ->section('method')
+            ->section(CourierConfiguration::METHOD_ONLY)
             ->default(15);
 
         $group->integer('default_width')
             ->hint('Default parcel width (cm)')
             ->max(100)
-            ->section('method')
+            ->section(CourierConfiguration::METHOD_ONLY)
             ->default(15);
 
         $group->integer('default_height')
             ->hint('Default parcel height (cm)')
             ->max(100)
-            ->section('method')
+            ->section(CourierConfiguration::METHOD_ONLY)
             ->default(15);
     }
 
@@ -194,7 +195,7 @@ class UpsDriver extends AbstractCourierDriver
      */
     public static function courierSettings(): void
     {
-        Settings::group('courier_ups', function (SettingGroup $group) {
+        Settings::group(static::SETTINGS, function (SettingGroup $group) {
             $group->string('server')
                 ->hint('The current environment')
                 ->required()
