@@ -151,6 +151,9 @@ class UpsDriver extends AbstractCourierDriver
         ]);
     }
 
+        /**
+     * Configure the fulfillment UPS settings.
+     */
     public static function fulfillmentMethodSettings(SettingGroup $group)
     {
         $group->string('ups_service_code')
@@ -174,19 +177,19 @@ class UpsDriver extends AbstractCourierDriver
         $group->integer('default_length')
             ->hint('Default parcel length (cm)')
             ->max(100)
-            ->section(CourierConfiguration::METHOD_ONLY)
+            ->section(static::METHOD_ONLY_SECTION)
             ->default(15);
 
         $group->integer('default_width')
             ->hint('Default parcel width (cm)')
             ->max(100)
-            ->section(CourierConfiguration::METHOD_ONLY)
+            ->section(static::METHOD_ONLY_SECTION)
             ->default(15);
 
         $group->integer('default_height')
             ->hint('Default parcel height (cm)')
             ->max(100)
-            ->section(CourierConfiguration::METHOD_ONLY)
+            ->section(static::METHOD_ONLY_SECTION)
             ->default(15);
     }
 

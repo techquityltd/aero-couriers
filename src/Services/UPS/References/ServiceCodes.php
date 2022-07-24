@@ -4,7 +4,7 @@ namespace Techquity\Aero\Couriers\Services\UPS\References;
 
 class ServiceCodes
 {
-    public const DEFAULT = '11';
+    public const DEFAULT = 'UPS Standard';
     public const TYPES = [
         '01' => 'Next Day Air',
         '02' => '2nd Day Air ',

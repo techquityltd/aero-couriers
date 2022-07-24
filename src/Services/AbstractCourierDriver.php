@@ -12,6 +12,8 @@ use Aero\Fulfillment\Responses\FulfillmentResponse;
 
 abstract class AbstractCourierDriver extends FulfillmentDriver
 {
+    public const METHOD_ONLY_SECTION = 'method';
+
     /**
      * The default fulfillment state of a fulfillment when created.
      *

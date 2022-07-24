@@ -2,7 +2,7 @@
 @push('scripts')
     <script>
         function getConfiguration(courier) {
-            fetch('{{ route('courier.fulfillment-method-config') }}/' + courier + '/{{ $fulfillmentMethod->id ?? '' }}', {
+            fetch('{{ route('courier.configuration.fulfillment-method') }}/' + courier + '/{{ $fulfillmentMethod->id ?? '' }}', {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')

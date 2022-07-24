@@ -1,35 +1,15 @@
 <?php
 
-
-use Aero\Fulfillment\FulfillmentProcessor;
 use Aero\Fulfillment\Models\Fulfillment;
 use Aero\Fulfillment\Models\FulfillmentMethod;
-use Techquity\Aero\Couriers\CourierConfiguration;
+use Techquity\Aero\Couriers\FulfillmentInstallation;
+use Techquity\Aero\Couriers\FulfillmentMethodInstallation;
 
-Route::post('courier/configuration/{courier?}/{method?}', function ($courier, FulfillmentMethod $method = null) {
-    $configuration = new CourierConfiguration($courier, $method);
-
-    if ($configuration->isValid()) {
-        $data['configuration'] = [
-            'key' => $configuration->key(),
-            'group' => $configuration->group(),
-            'settings' => $configuration->settings()
-        ];
-
-        return view('courier::configuration', $data)->render();
-    }
-})->name('courier.fulfillment-method-config');
-
-Route::post('courier/fulfillment/{method?}/{fulfillment?}', function (FulfillmentMethod $method, Fulfillment $fulfillment = null) {
-    $configuration = new CourierConfiguration($method->driver, $method, $fulfillment);
-
-    if ($configuration->isValid()) {
-        $data['configuration'] = [
-            'key' => $configuration->key(),
-            'group' => $configuration->group(),
-            'settings' => $configuration->settings()
-        ];
-
-        return view('courier::configuration', $data)->render();
-    }
-})->name('courier.fulfillment-config');
+Route::prefix('courier/configuration/')->name('courier.configuration.')->group(function () {
+    Route::any('fulfillment-method/{driver?}/{fulfillmentMethod?}', function (string $driver, ?FulfillmentMethod $fulfillmentMethod = null) {
+        return FulfillmentMethodInstallation::loadSettingsView($driver, $fulfillmentMethod);
+    })->name('fulfillment-method');
+    Route::any('fulfillment/{fulfillmentMethod?}/{fulfillment?}', function (?FulfillmentMethod $fulfillmentMethod = null, ?Fulfillment $fulfillment = null) {
+        return FulfillmentInstallation::loadSettingsView($fulfillmentMethod, $fulfillment);
+    })->name('fulfillment');
+});

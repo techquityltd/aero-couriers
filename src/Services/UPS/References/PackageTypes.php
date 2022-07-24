@@ -4,7 +4,7 @@ namespace Techquity\Aero\Couriers\Services\UPS\References;
 
 class PackageTypes
 {
-    public const DEFAULT = 57;
+    public const DEFAULT = 'Parcels';
     public const TYPES = [
         '01' => 'UPS Letter',
         '02' => 'Customer Supplied Package',
