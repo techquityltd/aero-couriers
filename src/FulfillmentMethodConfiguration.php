@@ -4,9 +4,7 @@ namespace Techquity\Aero\Couriers;
 
 use Aero\Admin\Utils\SettingHelpers;
 use Aero\Common\Facades\Settings;
-use Aero\Common\Models\Model;
 use Aero\Common\Settings\SettingGroup;
-use Aero\Fulfillment\Models\Fulfillment;
 use Aero\Fulfillment\Models\FulfillmentMethod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
