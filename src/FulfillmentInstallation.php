@@ -37,6 +37,12 @@ class FulfillmentInstallation extends AbstractCourierInstallation
     {
         AdminSlot::inject('orders.fulfillment.edit.cards', 'courier::fulfillments.configuration');
         AdminSlot::inject('orders.fulfillment.new.cards', 'courier::fulfillments.configuration');
+
+        AdminSlot::inject('orders.fulfillment.edit.cards', 'courier::fulfillments.consignments');
+        AdminSlot::inject('orders.fulfillment.new.cards', 'courier::fulfillments.consignments');
+
+        AdminSlot::inject('orders.fulfillment.edit.extra.sidebar', 'courier::fulfillments.information');
+        AdminSlot::inject('orders.fulfillment.new.extra.sidebar', 'courier::fulfillments.information');
     }
 
     /**

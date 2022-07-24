@@ -1,9 +1,9 @@
-{{-- @include('courier::fulfillments.consignments') --}}
-
 @isset($fulfillment->method->id)
     <input type="hidden" name="fulfillment_method" value="{{ $fulfillment->method->id }}" />
 @endisset
+
 <div id="courier-configuration-container"></div>
+
 @push('scripts')
     <script>
         function getConfiguration(method) {

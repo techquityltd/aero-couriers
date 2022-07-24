@@ -55,7 +55,7 @@ class UpsDriver extends AbstractCourierDriver
             })
             ->onSuccessful(function (Response $response) {
                 $this->fulfillment->update(['state' => 'open']);
-                dd($response, $response->string());
+
                 $trackingCode = $response->get('output.transactionShipments.0.masterTrackingNumber');
 
                 $this->fulfillment->tracking_code = $trackingCode;

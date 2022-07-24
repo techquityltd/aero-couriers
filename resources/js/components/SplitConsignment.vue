@@ -2,6 +2,14 @@
     <div>
         <h3>Consignments</h3>
         <div>
+
+                <label class="block">Parcels</label>
+                <input type="number" name="consignments['parcels']" v-model="numberOfParcels" class="w-full" :disabled="locked === 'true'" required />
+
+        </div>
+
+        <!-- <h3>Consignments</h3>
+        <div>
             <div class="w-1/3">
                 <label class="block">Parcels</label>
                 <input type="number" :id="label" :name="`configuration[${courier}][${label}][amount]`"
@@ -56,17 +64,13 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 </template>
 
 <script>
 export default {
     props: {
-        label: {
-            type: String,
-            required: true
-        },
         parcels: {
             type: Object,
             required: true

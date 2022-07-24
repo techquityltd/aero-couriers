@@ -74,12 +74,16 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: {
-    label: {
-      type: String,
-      required: true
-    },
     parcels: {
       type: Object,
       required: true
@@ -260,243 +264,35 @@ var render = function () {
     _c("h3", [_vm._v("Consignments")]),
     _vm._v(" "),
     _c("div", [
-      _c("div", { staticClass: "w-1/3" }, [
-        _c("label", { staticClass: "block" }, [_vm._v("Parcels")]),
-        _vm._v(" "),
-        _c("input", {
-          directives: [
-            {
-              name: "model",
-              rawName: "v-model",
-              value: _vm.numberOfParcels,
-              expression: "numberOfParcels",
-            },
-          ],
-          staticClass: "w-full",
-          attrs: {
-            type: "number",
-            id: _vm.label,
-            name:
-              "configuration[" + _vm.courier + "][" + _vm.label + "][amount]",
-            disabled: _vm.locked === "true",
-            required: "",
+      _c("label", { staticClass: "block" }, [_vm._v("Parcels")]),
+      _vm._v(" "),
+      _c("input", {
+        directives: [
+          {
+            name: "model",
+            rawName: "v-model",
+            value: _vm.numberOfParcels,
+            expression: "numberOfParcels",
           },
-          domProps: { value: _vm.numberOfParcels },
-          on: {
-            input: function ($event) {
-              if ($event.target.composing) {
-                return
-              }
-              _vm.numberOfParcels = $event.target.value
-            },
+        ],
+        staticClass: "w-full",
+        attrs: {
+          type: "number",
+          name: "consignments['parcels']",
+          disabled: _vm.locked === "true",
+          required: "",
+        },
+        domProps: { value: _vm.numberOfParcels },
+        on: {
+          input: function ($event) {
+            if ($event.target.composing) {
+              return
+            }
+            _vm.numberOfParcels = $event.target.value
           },
-        }),
-      ]),
-    ]),
-    _vm._v(" "),
-    _c(
-      "div",
-      { staticClass: "flex flex-wrap" },
-      _vm._l(Number(_vm.numberOfParcels), function (index) {
-        return _c("div", { key: index, staticClass: "w-1/3 my-4" }, [
-          _c("div", { staticClass: "flex flex-col card m-2" }, [
-            _c("h3", [
-              _vm._v("Parcel #"),
-              _c("span", { domProps: { innerHTML: _vm._s(index) } }),
-            ]),
-            _vm._v(" "),
-            _c("div", [
-              _c("label", { staticClass: "block" }, [_vm._v("Weight")]),
-              _vm._v(" "),
-              _c("div", { staticClass: "price price--right" }, [
-                _c("input", {
-                  directives: [
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.weights[index],
-                      expression: "weights[index]",
-                    },
-                  ],
-                  staticClass: "w-full",
-                  attrs: {
-                    type: "number",
-                    autocomplete: "off",
-                    min: "0",
-                    name:
-                      "configuration[" +
-                      _vm.courier +
-                      "][" +
-                      _vm.label +
-                      "][weights][" +
-                      index +
-                      "]",
-                    disabled: _vm.locked === "true",
-                    required: "",
-                  },
-                  domProps: { value: _vm.weights[index] },
-                  on: {
-                    input: function ($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.$set(_vm.weights, index, $event.target.value)
-                    },
-                  },
-                }),
-                _vm._v(" "),
-                _c("label", {
-                  domProps: { innerHTML: _vm._s(_vm.weightUnit) },
-                }),
-              ]),
-            ]),
-            _vm._v(" "),
-            _vm.withDimensions
-              ? _c("div", [
-                  _c("div", { staticClass: "mt-2" }, [
-                    _c("label", { staticClass: "block" }, [_vm._v("Length")]),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "price price--right" }, [
-                      _c("input", {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.lengths[index],
-                            expression: "lengths[index]",
-                          },
-                        ],
-                        staticClass: "w-full",
-                        attrs: {
-                          type: "number",
-                          autocomplete: "off",
-                          min: "0",
-                          name:
-                            "configuration[" +
-                            _vm.courier +
-                            "][" +
-                            _vm.label +
-                            "][length][" +
-                            index +
-                            "]",
-                          disabled: _vm.locked === "true",
-                          required: "",
-                        },
-                        domProps: { value: _vm.lengths[index] },
-                        on: {
-                          input: function ($event) {
-                            if ($event.target.composing) {
-                              return
-                            }
-                            _vm.$set(_vm.lengths, index, $event.target.value)
-                          },
-                        },
-                      }),
-                      _vm._v(" "),
-                      _c("label", {
-                        domProps: { innerHTML: _vm._s(_vm.dimensionUnit) },
-                      }),
-                    ]),
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "mt-2" }, [
-                    _c("label", { staticClass: "block" }, [_vm._v("Width")]),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "price price--right" }, [
-                      _c("input", {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.widths[index],
-                            expression: "widths[index]",
-                          },
-                        ],
-                        staticClass: "w-full",
-                        attrs: {
-                          type: "number",
-                          autocomplete: "off",
-                          min: "0",
-                          name:
-                            "configuration[" +
-                            _vm.courier +
-                            "][" +
-                            _vm.label +
-                            "][weights][" +
-                            index +
-                            "]",
-                          disabled: _vm.locked === "true",
-                          required: "",
-                        },
-                        domProps: { value: _vm.widths[index] },
-                        on: {
-                          input: function ($event) {
-                            if ($event.target.composing) {
-                              return
-                            }
-                            _vm.$set(_vm.widths, index, $event.target.value)
-                          },
-                        },
-                      }),
-                      _vm._v(" "),
-                      _c("label", {
-                        domProps: { innerHTML: _vm._s(_vm.dimensionUnit) },
-                      }),
-                    ]),
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "mt-2" }, [
-                    _c("label", { staticClass: "block" }, [_vm._v("Height")]),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "price price--right" }, [
-                      _c("input", {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.heights[index],
-                            expression: "heights[index]",
-                          },
-                        ],
-                        staticClass: "w-full",
-                        attrs: {
-                          type: "number",
-                          autocomplete: "off",
-                          min: "0",
-                          name:
-                            "configuration[" +
-                            _vm.courier +
-                            "][" +
-                            _vm.label +
-                            "][weights][" +
-                            index +
-                            "]",
-                          disabled: _vm.locked === "true",
-                          required: "",
-                        },
-                        domProps: { value: _vm.heights[index] },
-                        on: {
-                          input: function ($event) {
-                            if ($event.target.composing) {
-                              return
-                            }
-                            _vm.$set(_vm.heights, index, $event.target.value)
-                          },
-                        },
-                      }),
-                      _vm._v(" "),
-                      _c("label", {
-                        domProps: { innerHTML: _vm._s(_vm.dimensionUnit) },
-                      }),
-                    ]),
-                  ]),
-                ])
-              : _vm._e(),
-          ]),
-        ])
+        },
       }),
-      0
-    ),
+    ]),
   ])
 }
 var staticRenderFns = []
