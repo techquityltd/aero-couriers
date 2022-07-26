@@ -28,6 +28,12 @@ class FulfillmentInstallation extends AbstractCourierInstallation
             /* @var $this \Aero\Fulfillment\Models\Fulfillment */
             $this->attributes['courier_configuration'] = json_encode($value);
         });
+
+        // Register the parent consignment relationship...
+        Fulfillment::macro('parent', function () {
+            /* @var $this \Aero\Fulfillment\Models\Fulfillment */
+            return $this->belongsTo(Fulfillment::class, 'parent_id');
+        });
     }
 
     /**
@@ -41,8 +47,18 @@ class FulfillmentInstallation extends AbstractCourierInstallation
         AdminSlot::inject('orders.fulfillment.edit.cards', 'courier::fulfillments.consignments');
         AdminSlot::inject('orders.fulfillment.new.cards', 'courier::fulfillments.consignments');
 
-        AdminSlot::inject('orders.fulfillment.edit.extra.sidebar', 'courier::fulfillments.information');
-        AdminSlot::inject('orders.fulfillment.new.extra.sidebar', 'courier::fulfillments.information');
+        AdminSlot::inject('orders.fulfillment.edit.extra.sidebar', function ($data) {
+            $data['shippingMethod'] = $data['item']->order->shippingMethod;
+            $data['otherConsignments'] = $data['item']->order->fulfillments->where('id', '!=', $data['fulfillment']->id);
+
+            return view('courier::fulfillments.information', $data);
+        });
+        AdminSlot::inject('orders.fulfillment.new.sidebar', function ($data) {
+            $data['shippingMethod'] = $data['order']->shippingMethod;
+            $data['otherConsignments'] = $data['order']->fulfillments;
+
+            return view('courier::fulfillments.information', $data);
+        });
     }
 
     /**

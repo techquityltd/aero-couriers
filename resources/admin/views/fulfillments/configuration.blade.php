@@ -6,8 +6,12 @@
 
 @push('scripts')
     <script>
+        const courierDrivers = @json(
+            isset($fulfillment->method) ? [$fulfillment->method->id => $fulfillment->method->isCourier] :
+            $methods->mapWithKeys(fn($method) => [$method->id => $method->isCourier])->toArray()
+        );
+
         function getConfiguration(method) {
-            console.log('{{ route('courier.configuration.fulfillment') }}/' + method + '/{{ $fulfillment->id ?? '' }}');
             fetch('{{ route('courier.configuration.fulfillment') }}/' + method + '/{{ $fulfillment->id ?? '' }}', {
                 method: 'POST',
                 headers: {
@@ -19,7 +23,7 @@
                 document.getElementById('courier-configuration-container').innerHTML = html;
             }).finally(function() {
                 @isset($fulfillment)
-                    @if ($fulfillment->state !== \Aero\Fulfillment\Models\Fulfillment::OPEN)
+                    @if ($fulfillment->state !== \Aero\Fulfillment\Models\Fulfillment::OPEN || $fulfillment->parent)
                         const container = document.getElementById('courier-configuration-container');
                         const settings = container.querySelectorAll('input, select, checkbox, textarea');
 
@@ -31,15 +35,33 @@
             });
         }
 
+        function shouldHideTrackingIfCourier(shouldHide)
+        {
+            let courierTracking = document.getElementById('courier-tracking');
+            let trackingCode = document.getElementById('tracking-code');
+            let container = trackingCode.parentElement.parentElement;
+
+            if (shouldHide) {
+                courierTracking.classList.remove('hidden')
+                container.classList.add('hidden')
+            } else {
+                courierTracking.classList.add('hidden')
+                container.classList.remove('hidden')
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             const method = document.getElementById('fulfillment-method');
 
             @isset($fulfillment->method)
                 getConfiguration('{{ $fulfillment->method->id }}');
+                shouldHideTrackingIfCourier(courierDrivers['{{ $fulfillment->method->id }}']);
             @else
                 getConfiguration(method.value);
+                shouldHideTrackingIfCourier(method.value);
                 method.addEventListener('change', function(event) {
-                    getConfiguration(event.target.value)
+                    getConfiguration(event.target.value);
+                    shouldHideTrackingIfCourier(courierDrivers[event.target.value]);
                 });
             @endisset
         });

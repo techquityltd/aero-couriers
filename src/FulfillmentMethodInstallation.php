@@ -8,6 +8,7 @@ use Aero\Admin\Http\Responses\Configuration\AdminFulfillmentMethodUpdate;
 use Aero\Fulfillment\Models\FulfillmentMethod;
 use Aero\Responses\ResponseBuilder;
 use Illuminate\Http\Request;
+use Techquity\Aero\Couriers\Services\AbstractCourierDriver;
 
 class FulfillmentMethodInstallation extends AbstractCourierInstallation
 {
@@ -16,6 +17,12 @@ class FulfillmentMethodInstallation extends AbstractCourierInstallation
      */
     protected static function configureMacros(): void
     {
+        // Register the mutator to check if method is a courier method...
+        FulfillmentMethod::macro('getIsCourierAttribute', function () {
+            /* @var $this \Aero\Fulfillment\Models\FulfillmentMethod */
+            return $this->getDriver() instanceof AbstractCourierDriver;
+        });
+
         // Register the get mutator for courier configuration...
         FulfillmentMethod::macro('getCourierConfigurationAttribute', function () {
             /* @var $this \Aero\Fulfillment\Models\FulfillmentMethod */
