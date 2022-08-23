@@ -80,6 +80,7 @@ class FulfillmentController extends Controller
     public function destroy(Fulfillment $fulfillment): RedirectResponse
     {
         $fulfillment->delete();
+        $fulfillment->children()->delete();
 
         return redirect()->route('admin.orders.view', ['order' => $fulfillment->items->first()->order]);
     }

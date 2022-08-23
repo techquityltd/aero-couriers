@@ -1,6 +1,6 @@
 <?php
 
-namespace Techquity\Aero\Couriers;
+namespace Techquity\Aero\Couriers\Configuration;
 
 use Aero\Admin\Utils\SettingHelpers;
 use Aero\Common\Facades\Settings;
@@ -9,6 +9,7 @@ use Aero\Fulfillment\Models\FulfillmentMethod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Techquity\Aero\Couriers\Abstracts\AbstractCourierConfiguration;
 
 class FulfillmentMethodConfiguration extends AbstractCourierConfiguration
 {

@@ -1,14 +1,17 @@
 <?php
 
-namespace Techquity\Aero\Couriers;
+namespace Techquity\Aero\Couriers\Installation;
 
 use Aero\Admin\AdminSlot;
+use Aero\Admin\Http\Responses\Orders\AdminOrderFulfillmentCreatePage;
+use Aero\Admin\Http\Responses\Orders\AdminOrderFulfillmentEditPage;
 use Aero\Admin\Http\Responses\Orders\AdminOrderFulfillmentStore;
 use Aero\Admin\Http\Responses\Orders\AdminOrderFulfillmentUpdate;
 use Aero\Fulfillment\Models\Fulfillment;
 use Aero\Fulfillment\Models\FulfillmentMethod;
 use Aero\Responses\ResponseBuilder;
 use Illuminate\Http\Request;
+use Techquity\Aero\Couriers\Abstracts\AbstractCourierInstallation;
 
 class FulfillmentInstallation extends AbstractCourierInstallation
 {
@@ -34,6 +37,12 @@ class FulfillmentInstallation extends AbstractCourierInstallation
             /* @var $this \Aero\Fulfillment\Models\Fulfillment */
             return $this->belongsTo(Fulfillment::class, 'parent_id');
         });
+
+        // Register the parent consignment relationship...
+        Fulfillment::macro('children', function () {
+            /* @var $this \Aero\Fulfillment\Models\Fulfillment */
+            return $this->hasMany(Fulfillment::class, 'parent_id');
+        });
     }
 
     /**
@@ -41,24 +50,26 @@ class FulfillmentInstallation extends AbstractCourierInstallation
      */
     protected static function configureAdminSlots(): void
     {
-        AdminSlot::inject('orders.fulfillment.edit.cards', 'courier::fulfillments.configuration');
-        AdminSlot::inject('orders.fulfillment.new.cards', 'courier::fulfillments.configuration');
+        AdminOrderFulfillmentCreatePage::extend(function ($page) {
+            $page->setData('parent', Fulfillment::find($page->request->query('parent')));
+            $page->setData('sisters', $page->getData('order')->fulfillments);
 
-        AdminSlot::inject('orders.fulfillment.edit.cards', 'courier::fulfillments.consignments');
-        AdminSlot::inject('orders.fulfillment.new.cards', 'courier::fulfillments.consignments');
-
-        AdminSlot::inject('orders.fulfillment.edit.extra.sidebar', function ($data) {
-            $data['shippingMethod'] = $data['item']->order->shippingMethod;
-            $data['otherConsignments'] = $data['item']->order->fulfillments->where('id', '!=', $data['fulfillment']->id);
-
-            return view('courier::fulfillments.information', $data);
+            // Add additional courier information...
+            AdminSlot::inject('orders.fulfillment.new.sidebar', 'courier::fulfillments.information-new');
         });
-        AdminSlot::inject('orders.fulfillment.new.sidebar', function ($data) {
-            $data['shippingMethod'] = $data['order']->shippingMethod;
-            $data['otherConsignments'] = $data['order']->fulfillments;
 
-            return view('courier::fulfillments.information', $data);
+        AdminOrderFulfillmentEditPage::extend(function ($page) {
+            $fulfillment = $page->getData('fulfillment');
+
+            $page->setData('parent', $fulfillment->parent);
+            $page->setData('sisters', data_get($fulfillment, 'items.0.order.fulfillments')->where('id', '!=', $fulfillment->id));
+
+            // Add additional courier information...
+            AdminSlot::inject('orders.fulfillment.edit.extra.sidebar', 'courier::fulfillments.information-edit');
         });
+
+        // Allow client to delete, process or retry fulfillments...
+        AdminSlot::inject('orders.fulfillment.edit.cards.extra.top', 'courier::fulfillments.manage');
     }
 
     /**
@@ -96,11 +107,20 @@ class FulfillmentInstallation extends AbstractCourierInstallation
                 FulfillmentMethod::findOrFail($request->input('fulfillment_method'))
             );
 
-            if ($configuration->hasCourierConfiguration()) {
-                $validator = $configuration->validator($request);
+            // Only validate if no parent
+            if ($request->input('parent')) {
+                $parent = Fulfillment::findOrFail($request->input('parent'));
+                // Child consignments cannot be a parent...
+                if ($parent->parent) {
+                    return back()->withInput();
+                }
+            } else {
+                if ($configuration->hasCourierConfiguration()) {
+                    $validator = $configuration->validator($request);
 
-                if ($validator->fails()) {
-                    return back()->withErrors($validator)->withInput();
+                    if ($validator->fails()) {
+                        return back()->withErrors($validator)->withInput();
+                    }
                 }
             }
 
@@ -114,10 +134,17 @@ class FulfillmentInstallation extends AbstractCourierInstallation
     protected static function saveFulfillmentConfiguration(): callable
     {
         return (function (ResponseBuilder $builder) {
-            $configuration = new FulfillmentConfiguration($builder->fulfillment->method, $builder->fulfillment);
+            if ($parent = $builder->request->input('parent')) {
+                $parent = Fulfillment::findOrFail($parent);
 
-            if ($configuration->hasCourierConfiguration()) {
-                $configuration->save($builder->request);
+                $builder->fulfillment->parent()->associate($parent);
+                $builder->fulfillment->save();
+            } else {
+                $configuration = new FulfillmentConfiguration($builder->fulfillment->method, $builder->fulfillment);
+
+                if ($configuration->hasCourierConfiguration()) {
+                    $configuration->save($builder->request);
+                }
             }
         });
     }

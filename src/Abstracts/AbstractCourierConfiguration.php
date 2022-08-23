@@ -1,6 +1,6 @@
 <?php
 
-namespace Techquity\Aero\Couriers;
+namespace Techquity\Aero\Couriers\Abstracts;
 
 use Aero\Admin\Utils\SettingHelpers;
 use Aero\Common\Settings\SettingGroup;

@@ -12,8 +12,7 @@ use Techquity\Aero\Couriers\Services\Ups\Client\Client;
 use Techquity\Aero\Couriers\Services\Ups\Factories\ShipmentFactory;
 use Techquity\Aero\OrderDocuments\Models\OrderDocumentGroup;
 use Illuminate\Support\Str;
-use Techquity\Aero\Couriers\CourierConfiguration;
-use Techquity\Aero\Couriers\Services\AbstractCourierDriver;
+use Techquity\Aero\Couriers\Abstracts\AbstractCourierDriver;
 use Techquity\Aero\Couriers\Services\UPS\References\PackageTypes;
 use Techquity\Aero\Couriers\Services\UPS\References\ServiceCodes;
 use Techquity\Aero\Couriers\Services\UPS\References\ShipmentChargeType;
@@ -151,7 +150,7 @@ class UpsDriver extends AbstractCourierDriver
         ]);
     }
 
-        /**
+    /**
      * Configure the fulfillment UPS settings.
      */
     public static function fulfillmentMethodSettings(SettingGroup $group)

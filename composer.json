@@ -17,7 +17,7 @@
     ],
     "require": {
         "php": "^7.4|^8.0",
-        "aerocommerce/admin": "^1.6.3",
+        "aerocommerce/admin": "^1.9.10",
         "aerocommerce/core": "^0",
         "guzzlehttp/guzzle": "^6.3.1|^7.0.1",
         "illuminate/support": "^6.0",

@@ -1,8 +1,13 @@
-@isset($fulfillment->method->id)
-    <input type="hidden" name="fulfillment_method" value="{{ $fulfillment->method->id }}" />
+{{-- Set the fulfillment method if using a parents --}}
+@isset($parent)
+    <input type="hidden" name="fulfillment_method" value="{{ $parent->fulfillment_method_id }}" />
+    <input type="hidden" name="parent" value="{{ $parent->id }}" />
 @endisset
 
-<div id="courier-configuration-container"></div>
+{{-- Parent level container for configuration --}}
+@if(!$parent)
+    <div id="courier-configuration-container"></div>
+@endif
 
 @push('scripts')
     <script>
@@ -35,33 +40,15 @@
             });
         }
 
-        function shouldHideTrackingIfCourier(shouldHide)
-        {
-            let courierTracking = document.getElementById('courier-tracking');
-            let trackingCode = document.getElementById('tracking-code');
-            let container = trackingCode.parentElement.parentElement;
-
-            if (shouldHide) {
-                courierTracking.classList.remove('hidden')
-                container.classList.add('hidden')
-            } else {
-                courierTracking.classList.add('hidden')
-                container.classList.remove('hidden')
-            }
-        }
-
         window.addEventListener('DOMContentLoaded', () => {
             const method = document.getElementById('fulfillment-method');
 
             @isset($fulfillment->method)
                 getConfiguration('{{ $fulfillment->method->id }}');
-                shouldHideTrackingIfCourier(courierDrivers['{{ $fulfillment->method->id }}']);
             @else
                 getConfiguration(method.value);
-                shouldHideTrackingIfCourier(method.value);
                 method.addEventListener('change', function(event) {
                     getConfiguration(event.target.value);
-                    shouldHideTrackingIfCourier(courierDrivers[event.target.value]);
                 });
             @endisset
         });

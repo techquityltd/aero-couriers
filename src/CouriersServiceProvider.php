@@ -18,6 +18,8 @@ use Techquity\Aero\Couriers\BulkActions\DeleteFulfillmentsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\DispatchOrdersBulkAction;
 use Techquity\Aero\Couriers\BulkActions\DownloadLabelsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\PrintShippingLabelsBulkAction;
+use Techquity\Aero\Couriers\Installation\FulfillmentInstallation;
+use Techquity\Aero\Couriers\Installation\FulfillmentMethodInstallation;
 use Techquity\Aero\Couriers\Models\FulfillmentLog;
 
 class CouriersServiceProvider extends ModuleServiceProvider
@@ -43,7 +45,9 @@ class CouriersServiceProvider extends ModuleServiceProvider
 
         // Register the courier drivers...
         Relation::morphMap(
-            collect(config('couriers.drivers'))->mapWithKeys(fn ($driver) => [$driver::NAME => $driver])->toArray()
+            collect(config('couriers.drivers'))
+                ->mapWithKeys(fn ($driver) => [$driver::NAME => $driver])
+                ->toArray()
         );
 
         // Register the required application settings...

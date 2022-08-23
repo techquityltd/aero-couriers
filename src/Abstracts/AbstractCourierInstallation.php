@@ -1,6 +1,6 @@
 <?php
 
-namespace Techquity\Aero\Couriers;
+namespace Techquity\Aero\Couriers\Abstracts;
 
 abstract class AbstractCourierInstallation
 {
@@ -14,7 +14,6 @@ abstract class AbstractCourierInstallation
 
         // Configure the incoming requests
         static::configureAdminRequests();
-
 
         // static::modelObservers();
     }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Techquity\Aero\Couriers;
+namespace Techquity\Aero\Couriers\Installation;
 
 use Aero\Admin\AdminSlot;
 use Aero\Admin\Http\Responses\Configuration\AdminFulfillmentMethodStore;
@@ -8,6 +8,9 @@ use Aero\Admin\Http\Responses\Configuration\AdminFulfillmentMethodUpdate;
 use Aero\Fulfillment\Models\FulfillmentMethod;
 use Aero\Responses\ResponseBuilder;
 use Illuminate\Http\Request;
+use Techquity\Aero\Couriers\Abstracts\AbstractCourierDriver as AbstractsAbstractCourierDriver;
+use Techquity\Aero\Couriers\Abstracts\AbstractCourierInstallation;
+use Techquity\Aero\Couriers\Configuration\FulfillmentMethodConfiguration;
 use Techquity\Aero\Couriers\Services\AbstractCourierDriver;
 
 class FulfillmentMethodInstallation extends AbstractCourierInstallation
@@ -20,7 +23,7 @@ class FulfillmentMethodInstallation extends AbstractCourierInstallation
         // Register the mutator to check if method is a courier method...
         FulfillmentMethod::macro('getIsCourierAttribute', function () {
             /* @var $this \Aero\Fulfillment\Models\FulfillmentMethod */
-            return $this->getDriver() instanceof AbstractCourierDriver;
+            return $this->getDriver() instanceof AbstractsAbstractCourierDriver;
         });
 
         // Register the get mutator for courier configuration...

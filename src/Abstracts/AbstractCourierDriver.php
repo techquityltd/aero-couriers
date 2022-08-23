@@ -1,6 +1,6 @@
 <?php
 
-namespace Techquity\Aero\Couriers\Services;
+namespace Techquity\Aero\Couriers\Abstracts;
 
 use Aero\Cart\Models\Order;
 use Aero\Cart\Models\ShippingMethod;
