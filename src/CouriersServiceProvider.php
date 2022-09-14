@@ -2,37 +2,34 @@
 
 namespace Techquity\Aero\Couriers;
 
-use Aero\Admin\AdminSlot;
-use Aero\Admin\BulkAction;
+use Aero\Admin\{AdminModule, AdminSlot, BulkAction, Permissions};
+use Aero\Admin\BulkActions\DeleteShippingMethodsBulkAction;
+use Aero\Admin\Http\Requests\Settings\{CreateFulfillmentMethodRequest, UpdateFulfillmentMethodRequest};
+use Aero\Admin\Http\Requests\Orders\{CreateFulfillmentRequest, UpdateFulfillmentRequest};
+use Aero\Admin\Http\Responses\Configuration\{AdminFulfillmentMethodCreatePage, AdminFulfillmentMethodEditPage, AdminFulfillmentMethodStore, AdminFulfillmentMethodUpdate};
+use Aero\Admin\Http\Responses\Orders\{AdminOrderFulfillmentCreatePage, AdminOrderFulfillmentEditPage, AdminOrderFulfillmentStore, AdminOrderFulfillmentUpdate};
 use Aero\Admin\ResourceLists\FulfillmentsResourceList;
 use Aero\Admin\ResourceLists\OrdersResourceList;
-use Aero\Common\Facades\Settings;
 use Aero\Common\Providers\ModuleServiceProvider;
-use Aero\Common\Settings\SettingGroup;
 use Aero\Fulfillment\Models\Fulfillment;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Routing\Router;
-use Techquity\Aero\Couriers\BulkActions\CancelFulfillmentsBulkAction;
-use Techquity\Aero\Couriers\BulkActions\CreateFulfillmentsBulkAction;
-use Techquity\Aero\Couriers\BulkActions\DeleteFulfillmentsBulkAction;
-use Techquity\Aero\Couriers\BulkActions\DispatchOrdersBulkAction;
-use Techquity\Aero\Couriers\BulkActions\DownloadLabelsBulkAction;
-use Techquity\Aero\Couriers\BulkActions\PrintShippingLabelsBulkAction;
-use Techquity\Aero\Couriers\Installation\FulfillmentInstallation;
-use Techquity\Aero\Couriers\Installation\FulfillmentMethodInstallation;
-use Techquity\Aero\Couriers\Models\FulfillmentLog;
+use Aero\Fulfillment\Models\FulfillmentMethod;
+use Aero\Responses\ResponseBuilder;
+use Techquity\Aero\Couriers\BulkActions\CollectShipmentsBulkAction;
+use Techquity\Aero\Couriers\BulkActions\CommitCourierShipmentsBulkAction;
+use Techquity\Aero\Couriers\BulkActions\DeleteCourierConnectorsBulkAction;
+use Techquity\Aero\Couriers\BulkActions\DeleteCourierServicesBulkAction;
+use Techquity\Aero\Couriers\Models\{CourierConnector, CourierPrinter, CourierService, CourierShipment};
+use Techquity\Aero\Couriers\ResourceLists\CourierConnectorsResourceList;
+use Techquity\Aero\Couriers\ResourceLists\CourierServicesResourceList;
+use Techquity\Aero\Couriers\BulkActions\MergeCourierShipmentsBulkAction;
+use Techquity\Aero\Couriers\BulkActions\ShipOrdersBulkAction;
+use Techquity\Aero\Couriers\Http\Responses\Steps\{SaveFulfillmentMethodCourierOptions, CreateAndAttachShipment, UpdateFulfillmentShipment};
+use Techquity\Aero\Couriers\ResourceLists\CourierShipmentsResourceList;
+use Techquity\Aero\Couriers\Traits\UsesCourierDriver;
 
 class CouriersServiceProvider extends ModuleServiceProvider
 {
-    /**
-     * Register any application services.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        $this->mergeConfigFrom(__DIR__ . '/../config/couriers.php', 'couriers');
-    }
+    use UsesCourierDriver;
 
     /**
      * Bootstrap the application services.
@@ -40,84 +37,183 @@ class CouriersServiceProvider extends ModuleServiceProvider
     public function setup()
     {
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        Router::addAdminRoutes(__DIR__ . '/../routes/admin.php');
-        $this->loadViewsFrom(__DIR__ . '/../resources/admin/views', 'courier');
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'couriers');
 
-        // Register the courier drivers...
-        Relation::morphMap(
-            collect(config('couriers.drivers'))
-                ->mapWithKeys(fn ($driver) => [$driver::NAME => $driver])
-                ->toArray()
-        );
+        // Add the permissions used for managing couriers...
+        Permissions::add([
+            'couriers.manage-shipments',
+            'couriers.manage-services',
+            'couriers.manage-connectors',
+            'couriers.manage-collections',
+            'couriers.manage-printers',
+        ]);
 
-        // Register the required application settings...
-        $this->configureCourierSettings();
+        // Macro an attribute to determine if the method is courier...
+        FulfillmentMethod::macro('getIsCourierAttribute', function () {
+            return $this->getDriver() instanceof CourierDriver;
+        });
 
-        FulfillmentMethodInstallation::setup();
-        FulfillmentInstallation::setup();
+        // Add Courier Service relation...
+        FulfillmentMethod::macro('courierService', function () {
+            return $this->belongsTo(CourierService::class, 'courier_service_id');
+        });
+
+        // Add the Courier Connector relation...
+        FulfillmentMethod::macro('courierConnector', function () {
+            return $this->belongsTo(CourierConnector::class, 'courier_connector_id');
+        });
+
+        // Add the Courier Printer relation...
+        FulfillmentMethod::macro('courierPrinter', function () {
+            return $this->belongsTo(CourierPrinter::class, 'courier_printer_id');
+        });
+
+        Fulfillment::makeFillable('courier_shipment_id');
+        Fulfillment::macro('courierShipment', function () {
+            return $this->belongsTo(CourierShipment::class, 'courier_shipment_id', 'id');
+        });
+
+        FulfillmentsResourceList::extend(function (FulfillmentsResourceList $list) {
+            $list->addColumnAfter('Courier', function ($row) {
+                if ($row->courierShipment) {
+                    return optional($row->courierShipment->courierService)->carrier;
+                }
+            }, 'orders');
+        });
+
+        $this->configureCourierManagerModule();
+
+        $this->configureFulfillmentMethodsSetup();
+
+        $this->configureFulfillmentSetup();
     }
 
     /**
-     *  Register the application and courier settings.
+     * Configure and extend the courier manager module.
      */
-    protected function configureCourierSettings(): void
+    protected function configureCourierManagerModule(): void
     {
-        // Global courier settings...
-        Settings::group('courier', function (SettingGroup $group) {
-            $group->boolean('automatic_process')
-                ->label('Process fulfillments automatically after creating fulfillments.')
-                ->default(false);
+        // Create a new module for managing couriers...
+        AdminModule::create('shipment-manager')
+            ->title('Courier Manager')
+            ->summary('Manage your couriers and shipments.')
+            ->permissions('couriers.manage-shipments')
+            ->routes(__DIR__ . '/../routes/admin.php')
+            ->route('admin.courier-manager.shipments.index');
 
-            $group->string('default_weight')->in(['g', 'kg'])->default('g');
+        // Add the links to manage other aspects of the module...
+        AdminSlot::inject('couriers.shipments.index.header.buttons', function ($_) {
+            return view('couriers::resource-lists.manage');
         });
 
-        // Settings unique to the courier...
-        collect(config('couriers.drivers'))->each(fn ($driver) => $driver::courierSettings());
-    }
-
-    protected function addLoggingToFulfillments()
-    {
-        Fulfillment::macro('logs', function () {
-            return $this->hasMany(FulfillmentLog::class)->orderByDesc('id');
+        // Add the refresh services link to the resource list services...
+        AdminSlot::inject('couriers.services.index.header.buttons', function ($_) {
+            return view('couriers::resource-lists.refresh-services');
         });
 
-        AdminSlot::inject('orders.fulfillment.edit.cards', 'courier::fulfillments.logs');
+        BulkAction::create(MergeCourierShipmentsBulkAction::class, CourierShipmentsResourceList::class)
+            ->title('Merge Shipments')
+            ->permissions('couriers.manage-shipments');
+
+        BulkAction::create(CommitCourierShipmentsBulkAction::class, CourierShipmentsResourceList::class)
+            ->title('Commit Shipments')
+            ->permissions('couriers.manage-shipments');
+
+        BulkAction::create(DeleteShippingMethodsBulkAction::class, CourierShipmentsResourceList::class)
+            ->title('Delete Shipments')
+            ->permissions('couriers.manage-shipments')
+            ->confirm()
+            ->confirmTitle('Are you sure?')
+            ->confirmText('This will delete the selected shipments and fulfillments!');
+
+        BulkAction::create(CollectShipmentsBulkAction::class, CourierShipmentsResourceList::class)
+            ->title('Collect Shipments')
+            ->permissions('couriers.manage-shipments')
+            ->confirm()
+            ->confirmText('This will mark the selected shipments as collected and orders as dispatched!');
+
+        BulkAction::create(DeleteCourierConnectorsBulkAction::class, CourierConnectorsResourceList::class)
+            ->title('Delete Connectors')
+            ->permissions('couriers.manage-connectors');
+
+        BulkAction::create(DeleteCourierServicesBulkAction::class, CourierServicesResourceList::class)
+            ->title('Delete Services')
+            ->permissions('couriers.manage-services');
+
+        BulkAction::create(ShipOrdersBulkAction::class, OrdersResourceList::class)
+            ->title('Ship Orders')
+            ->permissions('couriers.manage-shipments');
     }
 
     /**
-     * Configure the applications bulk actions.
+     * Configure the fulfillment method courier configuration.
      */
-    protected function configureBulkActions(): void
+    protected function configureFulfillmentMethodsSetup(): void
     {
-        BulkAction::create(DispatchOrdersBulkAction::class, OrdersResourceList::class)
-            ->title('Dispatch Fulfillments')
-            ->permissions('orders.edit');
+        /**
+         * CREATE
+         */
+        AdminFulfillmentMethodCreatePage::extend(function (ResponseBuilder $builder) {
+            $this->attachCourierOptionsData($builder);
+            $this->attachCourierDrivers($builder);
 
-        BulkAction::create(CreateFulfillmentsBulkAction::class, OrdersResourceList::class)
-            ->title('Create Fulfillments')
-            ->permissions('orders.edit');
+            AdminSlot::inject('configuration.fulfillment-methods.new.cards', static::$selector_view);
+        });
 
-        BulkAction::create(PrintShippingLabelsBulkAction::class, OrdersResourceList::class)
-            ->title('Print Shipping Labels')
-            ->permissions('orders.edit');
+        $this->extendRequestForSelector(CreateFulfillmentMethodRequest::class);
 
-        BulkAction::create(CancelFulfillmentsBulkAction::class, FulfillmentsResourceList::class)
-            ->title('Cancel Fulfillments')
-            ->permissions('fulfillments.view');
+        AdminFulfillmentMethodStore::extend(SaveFulfillmentMethodCourierOptions::class);
 
-        BulkAction::create(DeleteFulfillmentsBulkAction::class, FulfillmentsResourceList::class)
-            ->title('Delete Canceled Fulfillments')
-            ->permissions('fulfillments.view');
+        /**
+         * UPDATE
+         */
+        AdminFulfillmentMethodEditPage::extend(function (ResponseBuilder $builder) {
+            $this->attachCourierOptionsData($builder);
+            $this->attachCourierDrivers($builder);
 
-        BulkAction::create(DownloadLabelsBulkAction::class, FulfillmentsResourceList::class)
-            ->title('Print Labels')
-            ->permissions('fulfillments.view');
+            AdminSlot::inject('configuration.fulfillment-methods.edit.cards', static::$selector_view);
+        });
+
+        $this->extendRequestForSelector(UpdateFulfillmentMethodRequest::class);
+
+        AdminFulfillmentMethodUpdate::extend(SaveFulfillmentMethodCourierOptions::class);
     }
 
-    public function assetLinks()
+    protected function configureFulfillmentSetup(): void
     {
-        return [
-            'techquity/couriers' => __DIR__ . '/../public',
-        ];
+        /**
+         * CREATE
+         */
+        AdminOrderFulfillmentCreatePage::extend(function (ResponseBuilder $builder) {
+            $this->attachCourierOptionsData($builder);
+            $this->attachCourierMethods($builder);
+
+            AdminSlot::inject('orders.fulfillment.new.cards', static::$selector_view);
+        });
+
+        $this->extendRequestForSelector(CreateFulfillmentRequest::class);
+
+        AdminOrderFulfillmentStore::extend(CreateAndAttachShipment::class);
+
+        /**
+         * UPDATE
+         */
+        AdminOrderFulfillmentEditPage::extend(function (ResponseBuilder $builder) {
+            if (!$shipment = $builder->fulfillment->courierShipment) {
+                return;
+            }
+
+            $this->attachCourierOptionsData($builder);
+            $this->attachCourierMethods($builder);
+
+            $builder->setData('shipment', $shipment);
+
+            AdminSlot::inject('orders.fulfillment.edit.cards', static::$selector_view);
+            AdminSlot::inject('orders.fulfillment.edit.cards.extra.top', 'couriers::slots.fulfillments.information');
+        });
+
+        $this->extendRequestForSelector(UpdateFulfillmentRequest::class);
+
+        AdminOrderFulfillmentUpdate::extend(UpdateFulfillmentShipment::class);
     }
 }

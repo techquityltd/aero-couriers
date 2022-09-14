@@ -20,8 +20,7 @@
         "aerocommerce/admin": "^1.9.10",
         "aerocommerce/core": "^0",
         "guzzlehttp/guzzle": "^6.3.1|^7.0.1",
-        "illuminate/support": "^6.0",
-        "techquity/aero-order-documents": "^1"
+        "illuminate/support": "^6.0"
     },
     "autoload": {
         "psr-4": {

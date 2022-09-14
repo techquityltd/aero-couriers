@@ -1,38 +1,45 @@
 <?php
 
-use Aero\Fulfillment\Models\Fulfillment;
-use Aero\Fulfillment\Models\FulfillmentMethod;
-use Illuminate\Http\Request;
-use Techquity\Aero\Couriers\FulfillmentInstallation;
-use Techquity\Aero\Couriers\FulfillmentMethodInstallation;
-use Techquity\Aero\Couriers\Http\Controllers\FulfillmentController;
+use Illuminate\Support\Facades\Route;
+use Techquity\Aero\Couriers\Http\Controllers\CourierConnectorsController;
+use Techquity\Aero\Couriers\Http\Controllers\CourierPrintersController;
+use Techquity\Aero\Couriers\Http\Controllers\CourierServicesController;
+use Techquity\Aero\Couriers\Http\Controllers\CourierShipmentsController;
+use Techquity\Aero\Couriers\Http\Controllers\CourierCollectionsController;
 
-Route::prefix('courier/configuration/')->name('courier.configuration.')->group(function () {
-    Route::post('fulfillment-method/{driver?}/{fulfillmentMethod?}', function (string $driver, ?FulfillmentMethod $fulfillmentMethod = null) {
-        return FulfillmentMethodInstallation::loadSettingsView($driver, $fulfillmentMethod);
-    })->name('fulfillment-method');
-    Route::post('fulfillment/{fulfillmentMethod?}/{fulfillment?}', function (?FulfillmentMethod $fulfillmentMethod = null, ?Fulfillment $fulfillment = null) {
-        return FulfillmentInstallation::loadSettingsView($fulfillmentMethod, $fulfillment);
-    })->name('fulfillment');
+Route::prefix('/courier/shipments')->middleware('can:couriers.manage-shipments')->name('admin.courier-manager.shipments.')->group(function () {
+    Route::get('/', [CourierShipmentsController::class, 'index'])->name('index');
+    Route::post('/commit', [CourierShipmentsController::class, 'commit'])->name('commit');
+    Route::post('/print/{shipment}', [CourierShipmentsController::class, 'print'])->name('print');
+    Route::post('/delete/{fulfillment}', [CourierShipmentsController::class, 'delete'])->name('delete');
+    Route::get('/request/{shipment}', [CourierShipmentsController::class, 'request'])->name('request');
+    Route::get('/response/{shipment}', [CourierShipmentsController::class, 'response'])->name('response');
 });
 
-Route::get('courier/consignments/{fulfillment?}', function (Request $request, ?Fulfillment $fulfillment = null) {
+Route::prefix('/courier/connectors')->middleware('can:couriers.manage-connectors')->name('admin.courier-manager.connectors.')->group(function () {
+    Route::get('/', [CourierConnectorsController::class, 'index'])->name('index');
+    Route::post('/', [CourierConnectorsController::class, 'store'])->name('store');
+    Route::get('/{connector}', [CourierConnectorsController::class, 'index'])->name('edit');
+    Route::put('/{connector}', [CourierConnectorsController::class, 'update'])->name('update');
+});
 
-    $q = strtolower($request->input('q'));
+Route::prefix('/courier/services')->middleware('can:couriers.manage-services')->name('admin.courier-manager.services.')->group(function () {
+    Route::get('/', [CourierServicesController::class, 'index'])->name('index');
+    Route::get('/{service}', [CourierServicesController::class, 'index'])->name('edit');
+    Route::put('/{service}', [CourierServicesController::class, 'update'])->name('update');
+    Route::post('/refresh', [CourierServicesController::class, 'store'])->name('store')->middleware('throttle:60,1');
+});
 
-    return Fulfillment::query()
-        ->select('id', 'reference')
-        ->whereLower('reference', 'like', "%{$q}%")
-        ->limit(20)
-        ->cursor()
-        ->map(function ($fulfillment) {
-            return [
-                'value' => (string) $fulfillment->id,
-                'name' => $fulfillment->reference,
-            ];
-        });
-})->name('courier.consignments');
+Route::prefix('/courier/collections')->middleware('can:couriers.manage-collections')->name('admin.courier-manager.collections.')->group(function () {
+    Route::get('/', [CourierCollectionsController::class, 'index'])->name('index');
+    Route::post('/manifest/{collection}', [CourierCollectionsController::class, 'manifest'])->name('manifest');
+    Route::delete('/delete/{collection}', [CourierCollectionsController::class, 'delete'])->name('delete');
+});
 
-Route::prefix('courier/')->name('admin.courier.')->group(function () {
-    Route::delete('fulfillment/{fulfillment}', [FulfillmentController::class, 'destroy'])->name('fulfillment.delete');
+Route::prefix('/courier/printers')->middleware('can:couriers.manage-printers')->name('admin.courier-manager.printers.')->group(function () {
+    Route::get('/', [CourierPrintersController::class, 'index'])->name('index');
+    Route::post('/store', [CourierPrintersController::class, 'store'])->name('store');
+    Route::put('/auto/{printer}', [CourierPrintersController::class, 'toggleAuto'])->name('toggle-auto');
+    Route::get('/{printer}', [CourierPrintersController::class, 'index'])->name('edit');
+    Route::put('/{printer}', [CourierPrintersController::class, 'update'])->name('update');
 });
