@@ -8,8 +8,13 @@ class CollectedStatusAdminFilter extends DropdownAdminFilter
 {
     protected function handleDropdown($selected, $query)
     {
-        if ($selected) {
-            $query->whereHas('collection', fn($q) => $q->where('collected', $selected === 'collected'));
+        switch ($selected) {
+            case 'any':
+                $query->whereHas('courierCollection')->orWhereDoesntHave('courierCollection');
+                break;
+            case 'collected':
+                $query->whereHas('courierCollection');
+                break;
         }
     }
 
@@ -18,11 +23,11 @@ class CollectedStatusAdminFilter extends DropdownAdminFilter
         return [
             [
                 'value' => '',
-                'name' => 'Any',
+                'name' => 'Uncollected Only',
             ],
             [
-                'value' => 'exclude',
-                'name' => 'Uncollected Only',
+                'value' => 'any',
+                'name' => 'Any',
             ],
             [
                 'value' => 'collected',

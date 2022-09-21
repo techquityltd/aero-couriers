@@ -96,8 +96,8 @@ class CourierShipmentsResourceList extends AbstractResourceList
             }, 'status'),
             ResourceListColumn::create('Collected', function ($row) {
                 return view('admin::resource-lists.status', [
-                    'active' => optional($row->collection)->collected,
-                    'pending' => !optional($row->collection)->collected,
+                    'active' => $row->isComplete(),
+                    'pending' => !$row->isComplete(),
                 ])->render();
             }, 'status'),
         ];
@@ -105,13 +105,10 @@ class CourierShipmentsResourceList extends AbstractResourceList
 
     protected function newQuery()
     {
-        return $this->resource->newQuery();
         return $this->resource->newQuery()->whereHas('fulfillments')
             ->when(!request()->has('collected-status'), function ($query) {
                 $query->where(function ($query) {
-                    $query->whereHas('collection', function ($query) {
-                        $query->where('collected', false);
-                    })->orWhereNull('courier_collection_id');
+                    $query->whereDoesntHave('courierCollection');
                 });
             });
     }

@@ -18,9 +18,9 @@ class CarrierAdminFilter extends CheckboxListAdminFilter
     protected function checkboxes(): array
     {
         return $this->getCourierDrivers()->keys()->map(fn ($method) => [
-            'id' => Str::slug($method),
+            'id' => $method,
             'name' => ucwords($method),
-            'url' => $this->getUrlFor(Str::slug($method)),
+            'url' => $this->getUrlFor($method),
         ])->toArray();
     }
 

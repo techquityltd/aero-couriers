@@ -9,7 +9,7 @@ class ConnectorAdminFilter extends CheckboxListAdminFilter
 {
     protected function handleCheckboxList(array $selected, $query)
     {
-        $query->whereIn('couriers_connector_id', $selected);
+        $query->whereHas('courierConnector', fn ($query) => $query->whereIn('id', $selected));
     }
 
     protected function checkboxes(): array
