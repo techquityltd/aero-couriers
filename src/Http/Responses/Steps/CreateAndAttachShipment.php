@@ -13,7 +13,7 @@ class CreateAndAttachShipment implements ResponseStep
 {
     public function handle(ResponseBuilder $builder, \Closure $next)
     {
-        if (!isset($builder->fulfillment->method) && $builder->fulfillment->method->isCourier) {
+        if (!isset($builder->fulfillment->method) || !$builder->fulfillment->method->isCourier) {
             return $next($builder);
         }
 
