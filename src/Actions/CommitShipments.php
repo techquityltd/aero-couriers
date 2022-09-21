@@ -10,8 +10,10 @@ class CommitShipments
 
     public function __invoke($shipments)
     {
-        $driver = $this->getCourierDrivers()->get($shipments->first()->courierService->carrier);
+        $shipments->groupBy(fn ($shipment) => $shipment->courierConnector->id)->each(function ($shipments) {
+            $driver = $this->getCourierDrivers()->get($shipments->first()->courierService->carrier);
 
-        (new $driver())->setShipments($shipments)->commit();
+            (new $driver())->setShipments($shipments)->commit();
+        });
     }
 }

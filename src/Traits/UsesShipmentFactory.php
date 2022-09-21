@@ -2,6 +2,7 @@
 
 namespace Techquity\Aero\Couriers\Traits;
 
+use Aero\Cart\Models\OrderAddress;
 use Aero\Fulfillment\Models\FulfillmentAddress;
 
 trait UsesShipmentFactory
@@ -19,6 +20,11 @@ trait UsesShipmentFactory
     protected function address()
     {
         return $this->fulfillments()->first()->address;
+    }
+
+    protected function getBillingAddress(): ?OrderAddress
+    {
+        return $this->orders()->first()->billingAddress;
     }
 
     protected function getRecipientAddress(): ?FulfillmentAddress

@@ -49,7 +49,9 @@ trait HandlesClientResponse
      */
     public function get(string $key, $default = null)
     {
-        return data_get($this->array(), $key, $default);
+        $value = data_get($this->array(), $key, $default);
+
+        return is_array($value) ? reset($value) : $value;
     }
 
     /**

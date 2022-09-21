@@ -23,7 +23,7 @@ class CourierConnector extends Model
     /**
      * Get the connectors decrypted password.
      */
-    public function getPasswordAttribute(string $value): string
+    public function getPasswordAttribute(string $value): ?string
     {
         return decrypt($value);
     }
@@ -31,7 +31,7 @@ class CourierConnector extends Model
     /**
      * Set the connectors encrypted password
      */
-    public function setPasswordAttribute(string $value): void
+    public function setPasswordAttribute(?string $value): void
     {
         $this->attributes['password'] = encrypt($value);
     }
@@ -39,7 +39,7 @@ class CourierConnector extends Model
     /**
      * Get the connectors decrypted token.
      */
-    public function getTokenAttribute(string $value): string
+    public function getTokenAttribute(string $value): ?string
     {
         return decrypt($value);
     }

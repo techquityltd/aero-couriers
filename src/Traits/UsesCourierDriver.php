@@ -3,6 +3,7 @@
 namespace Techquity\Aero\Couriers\Traits;
 
 use Aero\Common\Requests\AeroRequest;
+use Aero\Fulfillment\Models\FulfillmentMethod;
 use Aero\Responses\ResponseBuilder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Validation\Rule;
@@ -84,14 +85,26 @@ trait UsesCourierDriver
     protected static function courierServiceRules(): array
     {
         return [
-            Rule::requiredIf(fn () => static::getCourierDrivers()->has(request('driver'))),
+            'nullable',
+            Rule::requiredIf(function () {
+                // Aero has them named different in fulfillments and settings...
+                $fulfillmentMethod = FulfillmentMethod::find(request()->input('fulfillment_method') ?? request()->input('method'));
+
+                return $fulfillmentMethod && $fulfillmentMethod->isCourier;
+            }),
             Rule::exists('courier_services', 'id'),
         ];
     }
     protected static function courierConnectionRules(): array
     {
         return [
-            Rule::requiredIf(fn () => static::getCourierDrivers()->has(request('driver'))),
+            'nullable',
+            Rule::requiredIf(function () {
+                // Aero has them named different in fulfillments and settings...
+                $fulfillmentMethod = FulfillmentMethod::find(request()->input('fulfillment_method') ?? request()->input('method'));
+
+                return $fulfillmentMethod && $fulfillmentMethod->isCourier;
+            }),
             Rule::exists('courier_connectors', 'id'),
         ];
     }

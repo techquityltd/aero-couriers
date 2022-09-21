@@ -26,6 +26,7 @@ class ShipOrdersBulkAction extends BulkActionJob
     {
         $shipments = $this->list->items()
             ->reject(fn (Order $order) => (bool) $order->isFullyAllocated())
+            ->filter(fn (Order $order) => (bool) $order->shippingMethod)
             ->map(fn (Order $order) => (new CreateFulfillment($order))->fulfillment)
             ->map(fn (Fulfillment $fulfillment) => (new CreateShipment($fulfillment))->shipment)
             ->all();

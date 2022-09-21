@@ -8,6 +8,7 @@ use Aero\Admin\Traits\IsExtendable;
 use Illuminate\Routing\Route;
 use Techquity\Aero\Couriers\Filters\CarrierAdminFilter;
 use Techquity\Aero\Couriers\Models\CourierConnector;
+use Illuminate\Support\Str;
 
 class CourierConnectorsResourceList extends AbstractResourceList
 {
@@ -41,6 +42,16 @@ class CourierConnectorsResourceList extends AbstractResourceList
             }),
             ResourceListColumn::create('User', function ($row) {
                 return $row->user;
+            }),
+            ResourceListColumn::create('Token', function ($row) {
+                $limit = round(strlen($row->token) / 2);
+
+                $firstHalf = Str::substr($row->token, 0, $limit);
+                $firstHalf = preg_replace("/[^-]/i", "X", $firstHalf);
+
+                $lastHalf = Str::substr($row->token, $limit);
+
+                return $firstHalf . $lastHalf;
             }),
             ResourceListColumn::create('', function ($row) {
                 if ($row->id === $this->selected) {
