@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use Techquity\Aero\Couriers\Http\Controllers\CourierConnectorsController;
-use Techquity\Aero\Couriers\Http\Controllers\CourierPrintersController;
 use Techquity\Aero\Couriers\Http\Controllers\CourierServicesController;
 use Techquity\Aero\Couriers\Http\Controllers\CourierShipmentsController;
 use Techquity\Aero\Couriers\Http\Controllers\CourierCollectionsController;
@@ -34,12 +33,4 @@ Route::prefix('/courier/collections')->middleware('can:couriers.manage-collectio
     Route::get('/', [CourierCollectionsController::class, 'index'])->name('index');
     Route::post('/manifest/{collection}', [CourierCollectionsController::class, 'manifest'])->name('manifest');
     Route::delete('/delete/{collection}', [CourierCollectionsController::class, 'delete'])->name('delete');
-});
-
-Route::prefix('/courier/printers')->middleware('can:couriers.manage-printers')->name('admin.courier-manager.printers.')->group(function () {
-    Route::get('/', [CourierPrintersController::class, 'index'])->name('index');
-    Route::post('/store', [CourierPrintersController::class, 'store'])->name('store');
-    Route::put('/auto/{printer}', [CourierPrintersController::class, 'toggleAuto'])->name('toggle-auto');
-    Route::get('/{printer}', [CourierPrintersController::class, 'index'])->name('edit');
-    Route::put('/{printer}', [CourierPrintersController::class, 'update'])->name('update');
 });

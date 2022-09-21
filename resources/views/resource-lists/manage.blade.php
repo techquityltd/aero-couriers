@@ -20,11 +20,6 @@
                     <a href="{{ route('admin.courier-manager.collections.index', request()->all()) }}" class="block py-2 px-4 font-normal">Collections</a>
                 </li>
             @endcan
-            @can('couriers.manage-printers')
-                <li>
-                    <a href="{{ route('admin.courier-manager.printers.index', request()->all()) }}" class="block py-2 px-4 font-normal">Printers</a>
-                </li>
-            @endcan
         </ul>
     </template>
 </dropdown-menu>

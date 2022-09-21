@@ -15,11 +15,9 @@ class SaveFulfillmentMethodCourierOptions implements ResponseStep
         if ($fulfillmentMethod->getDriver() instanceof CourierDriver) {
             $fulfillmentMethod->courierService()->associate($builder->request->input('service'))->save();
             $fulfillmentMethod->courierConnector()->associate($builder->request->input('connector'))->save();
-            $fulfillmentMethod->courierPrinter()->associate($builder->request->input('printer'))->save();
         } else {
             $fulfillmentMethod->courierService()->dissociate()->save();
             $fulfillmentMethod->courierConnector()->dissociate()->save();
-            $fulfillmentMethod->courierPrinter()->dissociate()->save();
         }
 
         return $next($builder);

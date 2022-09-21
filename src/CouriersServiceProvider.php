@@ -18,7 +18,7 @@ use Techquity\Aero\Couriers\BulkActions\CollectShipmentsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\CommitCourierShipmentsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\DeleteCourierConnectorsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\DeleteCourierServicesBulkAction;
-use Techquity\Aero\Couriers\Models\{CourierConnector, CourierPrinter, CourierService, CourierShipment};
+use Techquity\Aero\Couriers\Models\{CourierConnector, CourierService, CourierShipment};
 use Techquity\Aero\Couriers\ResourceLists\CourierConnectorsResourceList;
 use Techquity\Aero\Couriers\ResourceLists\CourierServicesResourceList;
 use Techquity\Aero\Couriers\BulkActions\MergeCourierShipmentsBulkAction;
@@ -45,7 +45,6 @@ class CouriersServiceProvider extends ModuleServiceProvider
             'couriers.manage-services',
             'couriers.manage-connectors',
             'couriers.manage-collections',
-            'couriers.manage-printers',
         ]);
 
         // Macro an attribute to determine if the method is courier...
@@ -61,11 +60,6 @@ class CouriersServiceProvider extends ModuleServiceProvider
         // Add the Courier Connector relation...
         FulfillmentMethod::macro('courierConnector', function () {
             return $this->belongsTo(CourierConnector::class, 'courier_connector_id');
-        });
-
-        // Add the Courier Printer relation...
-        FulfillmentMethod::macro('courierPrinter', function () {
-            return $this->belongsTo(CourierPrinter::class, 'courier_printer_id');
         });
 
         Fulfillment::makeFillable('courier_shipment_id');

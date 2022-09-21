@@ -17,7 +17,6 @@ class UpdateFulfillmentShipment implements ResponseStep
 
         $this->shipment->courierService()->associate($builder->request->service);
         $this->shipment->courierConnector()->associate($builder->request->connector);
-        $this->shipment->courierPrinter()->associate($builder->request->printer);
         $this->shipment->save();
 
         return $next($builder);

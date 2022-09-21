@@ -83,14 +83,6 @@ class CourierShipment extends Model
     /**
      * Get the collection used for the shipment.
      */
-    public function courierPrinter()
-    {
-        return $this->belongsTo(CourierPrinter::class);
-    }
-
-    /**
-     * Get the collection used for the shipment.
-     */
     public function courierCollection()
     {
         return $this->belongsTo(CourierCollection::class);

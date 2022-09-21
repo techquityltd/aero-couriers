@@ -44,26 +44,6 @@
                 </div>
             </div>
         @endisset
-
-        @isset($printers)
-            <div class="w-1/3">
-                <div class="px-2 mb-4">
-                    <label for="courier-printer" class="block">Printer</label>
-                    <div class="select w-full">
-                        <select id="courier-printer" name="printer" class="w-full"
-                            @if (isset($fulfillment) && !$fulfillment->isOpen()) disabled @endif>
-                            <option value="">Manual</option>
-                            @foreach ($printers as $key => $printer)
-                                <option value="{{ $key }}" {{ old('printer') }}
-                                    @if ($selectedPrinter === $key) selected @endif>
-                                    {{ $printer }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-            </div>
-        @endisset
     </div>
 </div>
 
@@ -98,7 +78,6 @@
             {
                 document.getElementById("courier-service").disabled = true;
                 document.getElementById("courier-connector").disabled = true;
-                document.getElementById("courier-printer").disabled = true;
             }
 
             // Enable or disable the courier form.
@@ -123,7 +102,7 @@
 
              // Set the default options for courier settings.
             function setSelectedCourierOptions(fulfillmentMethod) {
-                ["service", "connector", "printer"].forEach(type => {
+                ["service", "connector"].forEach(type => {
                     let selector = document.querySelector("#courier-" + type);
                     selector.value = fulfillmentMethod[type];
                 });

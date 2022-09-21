@@ -6,7 +6,6 @@ use Aero\Responses\ResponseBuilder;
 use Aero\Responses\ResponseStep;
 use Techquity\Aero\Couriers\Actions\CreateShipment;
 use Techquity\Aero\Couriers\Models\CourierConnector;
-use Techquity\Aero\Couriers\Models\CourierPrinter;
 use Techquity\Aero\Couriers\Models\CourierService;
 
 class CreateAndAttachShipment implements ResponseStep
@@ -21,8 +20,7 @@ class CreateAndAttachShipment implements ResponseStep
 
         (new CreateShipment($fulfillment))
             ->usingService(CourierService::findOrFail($builder->request->service))
-            ->usingConnector(CourierConnector::findOrFail($builder->request->connector))
-            ->usingPrinter(CourierPrinter::find($builder->request->printer));
+            ->usingConnector(CourierConnector::findOrFail($builder->request->connector));
 
         return $next($builder);
     }

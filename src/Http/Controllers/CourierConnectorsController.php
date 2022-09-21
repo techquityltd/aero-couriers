@@ -6,7 +6,6 @@ use Aero\Admin\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Techquity\Aero\Couriers\Http\Requests\CourierConnectorRequest;
 use Techquity\Aero\Couriers\Models\CourierConnector;
-use Techquity\Aero\Couriers\Models\CourierPrinter;
 use Techquity\Aero\Couriers\ResourceLists\CourierConnectorsResourceList;
 use Techquity\Aero\Couriers\Traits\UsesCourierDriver;
 
@@ -17,7 +16,6 @@ class CourierConnectorsController extends Controller
     public function index(CourierConnectorsResourceList $list, Request $request, ?CourierConnector $connector = null)
     {
         return view('couriers::resource-lists.connectors', [
-            'printers' => CourierPrinter::all(),
             'carriers' => $this->getCourierDrivers()->keys()->toArray(),
             'connector' => $connector,
             'list' => $list = $list(),
@@ -45,5 +43,4 @@ class CourierConnectorsController extends Controller
             ]),
         ]);
     }
-
 }

@@ -80,9 +80,6 @@ class CourierShipmentsResourceList extends AbstractResourceList
             ResourceListColumn::create('Connector', function ($row) {
                 return optional($row->courierConnector)->name;
             }),
-            ResourceListColumn::create('Printer', function ($row) {
-                return optional($row->courierPrinter)->name ?? 'Manual';
-            }),
             ResourceListColumn::create('Admin', function ($row) {
                 if ($row->admin) {
                     return view('admin::resource-lists.link', [

@@ -19,7 +19,6 @@ class CreateCourierShipmentsTable extends Migration
             $table->unsignedBigInteger('courier_connector_id')->nullable();
             $table->unsignedBigInteger('courier_service_id')->nullable();
             $table->unsignedBigInteger('courier_collection_id')->nullable();
-            $table->unsignedBigInteger('courier_printer_id')->nullable();
             $table->string('consignment_number')->nullable();
             $table->boolean('committed')->default(false);
             $table->boolean('failed')->default(false);
@@ -49,11 +48,6 @@ class CreateCourierShipmentsTable extends Migration
             $table->foreign('courier_collection_id')
                 ->references('id')
                 ->on('courier_collections')
-                ->onDelete('set null');
-
-            $table->foreign('courier_printer_id')
-                ->references('id')
-                ->on('courier_printers')
                 ->onDelete('set null');
         });
     }
