@@ -103,7 +103,7 @@ class CourierShipment extends Model
 
     public function isComplete(): bool
     {
-        return optional($this->courierCollection)->complete ?? false;
+        return (bool) $this->courierCollection;
     }
 
     /**
