@@ -4,16 +4,21 @@ namespace Techquity\Aero\Couriers\Models;
 
 use Aero\Admin\Models\Admin;
 use Aero\Cart\Models\Order;
-use Aero\Cart\Models\OrderStatus;
 use Aero\Common\Models\Model;
+use Illuminate\Support\Str;
 use Aero\Fulfillment\Models\Fulfillment;
-use Illuminate\Database\Eloquent\MassAssignmentException;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Storage;
+use Techquity\Aero\Couriers\Abstracts\AbstractResponse;
+use Techquity\Aero\Couriers\Events\ShipmentCanceled;
+use Techquity\Aero\Couriers\Events\ShipmentCollected;
+use Techquity\Aero\Couriers\Events\ShipmentCommitted;
+use Techquity\Aero\Couriers\Events\ShipmentFailed;
+use Techquity\Aero\Couriers\Traits\InteractsWithFulfillmentDriver;
 
 class CourierShipment extends Model
 {
     use SoftDeletes;
+    use InteractsWithFulfillmentDriver;
 
     /**
      * The attributes that are mass assignable.
@@ -88,34 +93,52 @@ class CourierShipment extends Model
         return $this->belongsTo(CourierCollection::class);
     }
 
+    /**
+     * Determine if the shipments orders are fully allocated.
+     */
     public function isFullyAllocated(): bool
     {
         return $this->orders->filter(fn (Order $order) => $order->isFullyAllocated)->count() === $this->orders->count();
     }
 
+    /**
+     * Determine if the shipment has been committed and collected.
+     */
     public function isComplete(): bool
     {
         return (bool) $this->courierCollection;
     }
 
     /**
+     * Get the fulfillment driver used for the shipment.
+     */
+    public function getDriverAttribute()
+    {
+        return $this->getCourierDrivers($this->courierService->carrier);
+    }
+
+    /**
      * Mark the shipment as committed and update its relations.
      */
-    public function markAsCommitted(string $consignmentNumber, ?string $trackingNumber = '', ?string $trackingUrl = '', ?string $label = ''): self
+    public function markAsCommitted(?AbstractResponse $response = null): self
     {
         $this->update([
-            'consignment_number' => $consignmentNumber,
-            'label' => $label,
+            'consignment_number' => $response->getConsignmentNumber() ?? Str::random(),
+            'label' => $response->getLabel() ?? null,
             'committed' => true,
         ]);
 
         $this->fulfillments->each->update([
-            'tracking_code' => $trackingNumber,
-            'tracking_url' => $trackingUrl,
+            'tracking_code' => $response->getTrackingNumber() ?? '',
+            'tracking_url' => $response->getTrackingUrl() ?? '',
             'state' => Fulfillment::SUCCESSFUL
         ]);
 
-        // FIRE EVENT
+        $this->orders->each(function (Order $order) {
+            $this->driver::determineOrderStatus($order, $this);
+        });
+
+        event(new ShipmentCommitted($this));
 
         return $this;
     }
@@ -123,17 +146,21 @@ class CourierShipment extends Model
     /**
      * Mark the shipment as failed and trigger required events.
      */
-    public function markAsFailed($messages): self
+    public function markAsFailed($messages = null): self
     {
-        $this->fulfillments->each->update(['state' => Fulfillment::FAILED]);
+        if ($messages instanceof AbstractResponse) {
+            $messages = $messages->getFailedMessages();
+        }
 
         $this->updateFailedMessages($messages);
 
-        $this->update([
-            'failed' => true,
-        ]);
+        $this->fulfillments->each->update(['state' => Fulfillment::FAILED]);
 
-        // FIRE EVENT
+        $this->orders->each(function (Order $order) {
+            $this->driver::determineOrderStatus($order, $this);
+        });
+
+        event(new ShipmentFailed($this));
 
         return $this;
     }
@@ -149,12 +176,38 @@ class CourierShipment extends Model
             'cancelled' => true,
         ]);
 
-        // FIRE EVENT
+        $this->orders->each(function (Order $order) {
+            $this->driver::determineOrderStatus($order, $this);
+        });
+
+        event(new ShipmentCanceled($this));
 
         return $this;
     }
 
-    public function updateFailedMessages($messages)
+    /**
+     * Mark the shipment as collected.
+     */
+    public function markAsCollected(CourierCollection $courierCollection): self
+    {
+        $this->courierCollection()->associate($courierCollection);
+        $this->save();
+
+        $this->fulfillments->each->update(['state' => Fulfillment::SUCCESSFUL]);
+
+        $this->orders->each(function (Order $order) {
+            $this->driver::determineOrderStatus($order, $this);
+        });
+
+        event(new ShipmentCollected($this));
+
+        return $this;
+    }
+
+    /**
+     * Save the error messages to the shipment.
+     */
+    public function updateFailedMessages($messages): void
     {
         if (is_string($messages)) {
             $messages = array($messages);
@@ -164,5 +217,18 @@ class CourierShipment extends Model
             'failed' => true,
             'failed_messages' => $messages
         ]);
+    }
+
+    /**
+     * Save the request and response data.
+     */
+    public function saveResponse(AbstractResponse $response): self
+    {
+        $this->update([
+            'request' => json_encode($response->request()),
+            'response' => json_encode($response->original()),
+        ]);
+
+        return $this;
     }
 }

@@ -45,8 +45,7 @@ class CourierDriver extends FulfillmentDriver
     public function commit(): void
     {
         $this->shipments->each(function (CourierShipment $shipment) {
-            $shipment->markAsCommitted(Str::random(11))
-                ->orders->each(fn ($order) => $this->determineOrderStatus($order, $shipment));
+            $shipment->markAsCommitted();
         });
     }
 
@@ -104,7 +103,7 @@ class CourierDriver extends FulfillmentDriver
     /**
      * Determine what status the order should be.
      */
-    public function determineOrderStatus(Order $order, CourierShipment $shipment): OrderStatus
+    public static function determineOrderStatus(Order $order, CourierShipment $shipment): OrderStatus
     {
         if ($shipment->isComplete()) {
             return OrderStatus::forState(OrderStatus::COMPLETE)->first();

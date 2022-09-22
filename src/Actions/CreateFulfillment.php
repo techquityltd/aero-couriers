@@ -4,7 +4,6 @@ namespace Techquity\Aero\Couriers\Actions;
 
 use Aero\Cart\Models\Order;
 use Aero\Cart\Models\OrderItem;
-use Aero\Cart\Models\ShippingMethod;
 use Aero\Fulfillment\Models\Fulfillment;
 use Aero\Fulfillment\Models\FulfillmentAddress;
 use Aero\Fulfillment\Models\FulfillmentMethod;

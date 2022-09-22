@@ -40,6 +40,7 @@ class CourierServicesController extends Controller
         $this->getCourierDrivers()->each(function ($driver) {
             resolve($driver)->getServices()->each(function ($service) use ($driver) {
                 $service['service_type'] = isset($service['service_type']) ? $service['service_type'] : $service['service_code'];
+
                 $model = CourierService::query()
                     ->where('carrier', $driver::NAME)
                     ->where('service_type', $service['service_type'])
