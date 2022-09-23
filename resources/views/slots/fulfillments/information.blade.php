@@ -9,9 +9,17 @@
                 <button class="w-full btn btn-secondary" type="submit">Print Label</button>
             </form>
         @endif
+        @if(!$shipment->committed)
+            <form class="w-1/3 mx-1" action="{{ route('admin.courier-manager.shipments.commit', $fulfillment) }}" method="post">
+                @csrf
+                @method('PUT')
+                <button class="w-full btn btn-secondary" type="submit">Commit</button>
+            </form>
+        @endif
         @if(!$shipment->isComplete())
             <form class="w-1/3 mx-1" action="{{ route('admin.courier-manager.shipments.delete', $fulfillment) }}" method="post">
                 @csrf
+                @method('DELETE')
                 <button class="w-full btn btn-error" type="submit">Delete</button>
             </form>
         @endif
