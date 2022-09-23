@@ -41,9 +41,11 @@ class AbstractShipmentFactory implements ShipmentFactory
         return data_get($this->shipment->courierService, $key, $default);
     }
 
-    public function additional(string $key, ?string $default = null)
+    public function additional(string $key, $default = null)
     {
-        return $this->fulfillmentMethod->additional($key) ?? $default;
+        $additional = $this->fulfillmentMethod->additional($key);
+
+        return isset($additional) ? $additional : $default;
     }
 
     public function connector(string $key, ?string $default = null)

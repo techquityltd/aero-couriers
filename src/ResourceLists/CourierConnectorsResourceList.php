@@ -37,13 +37,13 @@ class CourierConnectorsResourceList extends AbstractResourceList
             ResourceListColumn::create('Carrier', function ($row) {
                 return $row->carrier;
             }),
-            ResourceListColumn::create('URL', function ($row) {
+            ResourceListColumn::create('', function ($row) {
                 return $row->url;
             }),
-            ResourceListColumn::create('User', function ($row) {
+            ResourceListColumn::create('', function ($row) {
                 return $row->user;
             }),
-            ResourceListColumn::create('Token', function ($row) {
+            ResourceListColumn::create('', function ($row) {
                 $limit = round(strlen($row->token) / 2);
 
                 $firstHalf = Str::substr($row->token, 0, $limit);

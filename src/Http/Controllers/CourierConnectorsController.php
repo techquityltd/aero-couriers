@@ -16,7 +16,9 @@ class CourierConnectorsController extends Controller
     public function index(CourierConnectorsResourceList $list, Request $request, ?CourierConnector $connector = null)
     {
         return view('couriers::resource-lists.connectors', [
-            'carriers' => $this->getCourierDrivers()->keys()->toArray(),
+            'carriers' => $this->getCourierDrivers()->flatMap(function ($class, $driver) {
+                return [$driver => $class::configureConnectorsVariables()];
+            }),
             'connector' => $connector,
             'list' => $list = $list(),
             'results' => $list->apply($request->all())
