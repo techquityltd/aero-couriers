@@ -10,8 +10,12 @@ class CollectShipments
 
     public function __invoke($shipments)
     {
-        $driver = $this->getCourierDrivers()->get($shipments->first()->courierService->carrier);
+        $shipments->groupBy(fn ($shipment) => $shipment->courierConnector->id)->each(function ($shipments) {
+            $driver = $this->getCourierDrivers()->get($shipments->first()->courierService->carrier);
 
-        (new $driver())->setShipments($shipments)->collect();
+            (new $driver())->setShipments($shipments)->collect();
+        });
+
+        return true;
     }
 }

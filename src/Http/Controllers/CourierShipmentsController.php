@@ -6,6 +6,7 @@ use Aero\Admin\Http\Controllers\Controller;
 use Aero\Fulfillment\Models\Fulfillment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Techquity\Aero\Couriers\Actions\CollectShipments;
 use Techquity\Aero\Couriers\Actions\CommitShipments;
 use Techquity\Aero\Couriers\Actions\DeleteFulfillment;
 use Techquity\Aero\Couriers\Models\CourierShipment;
@@ -56,6 +57,19 @@ class CourierShipmentsController extends Controller
 
         return redirect()->back()->with([
             'error' => __('There was an issue committing shipment.'),
+        ]);
+    }
+
+    public function collect(Fulfillment $fulfillment)
+    {
+        if ((new CollectShipments())(collect([$fulfillment->courierShipment]))) {
+            return redirect()->back()->with([
+                'message' => __('Shipment successfully marked as collected.'),
+            ]);
+        }
+
+        return redirect()->back()->with([
+            'error' => __('There was an issue marking the shipment as collected.'),
         ]);
     }
 

@@ -9,6 +9,7 @@ use Techquity\Aero\Couriers\Http\Controllers\CourierCollectionsController;
 Route::prefix('/courier/shipments')->middleware('can:couriers.manage-shipments')->name('admin.courier-manager.shipments.')->group(function () {
     Route::get('/', [CourierShipmentsController::class, 'index'])->name('index');
     Route::put('/commit/{fulfillment}', [CourierShipmentsController::class, 'commit'])->name('commit');
+    Route::put('/collect/{fulfillment}', [CourierShipmentsController::class, 'collect'])->name('collect');
     Route::post('/print/{shipment}', [CourierShipmentsController::class, 'print'])->name('print');
     Route::delete('/delete/{fulfillment}', [CourierShipmentsController::class, 'delete'])->name('delete');
     Route::get('/request/{shipment}', [CourierShipmentsController::class, 'request'])->name('request');

@@ -16,7 +16,14 @@
                 <button class="w-full btn btn-secondary" type="submit">Commit</button>
             </form>
         @endif
-        @if(!$shipment->isComplete())
+        @if($shipment->committed && !$shipment->isComplete())
+            <form class="w-1/3 mx-1" action="{{ route('admin.courier-manager.shipments.collect', $fulfillment) }}" method="post">
+                @csrf
+                @method('PUT')
+                <button class="w-full btn btn-secondary" type="submit">Collected</button>
+            </form>
+        @endif
+        @if(!$shipment->committed && !$shipment->isComplete())
             <form class="w-1/3 mx-1" action="{{ route('admin.courier-manager.shipments.delete', $fulfillment) }}" method="post">
                 @csrf
                 @method('DELETE')
@@ -34,10 +41,17 @@
         <label class="block">Status</label>
         <div class="mt-2 mb-4">
             <span class="bg-white rounded py-1 px-2 whitespace-no-wrap inline-block orb orb--2">
-                <span class="inline-block w-orb h-orb rounded-full align-middle @if($shipment->collected) bg-success @elseif($shipment->committed) bg-orange @elseif($shipment->failed) bg-error @else bg-grey @endif"></span>
-                    <span class="pl-orb align-middle">@if($shipment->collected) Collected @elseif($shipment->committed) Committed @elseif($shipment->failed) Failed @else Pending @endif</span>
+                <span class="inline-block w-orb h-orb rounded-full align-middle @if($shipment->isComplete()) bg-success @elseif($shipment->committed) bg-orange @elseif($shipment->failed) bg-error @else bg-grey @endif"></span>
+                    <span class="pl-orb align-middle">@if($shipment->isComplete()) Collected @elseif($shipment->committed) Committed @elseif($shipment->failed) Failed @else Pending @endif</span>
             </span>
         </div>
+        @if($shipment->isComplete())
+            <label class="block">Collected On</label>
+            <div class="mt-2 mb-4">
+                {{ $shipment->courierCollection->created_at }}
+            </div>
+        @endif
+
         @if($shipment->failed_messages)
             <label class="block">Failed Reason</label>
             @foreach ($shipment->failed_messages as $message)
