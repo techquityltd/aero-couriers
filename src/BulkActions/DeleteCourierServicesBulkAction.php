@@ -18,7 +18,11 @@ class DeleteCourierServicesBulkAction extends BulkActionJob
     public function handle(): void
     {
         $this->list->items()->each(function (CourierService $connector) {
-            $connector->delete();
+            if ($connector->trashed()) {
+                $connector->restore();
+            } else {
+                $connector->delete();
+            }
         });
     }
 }

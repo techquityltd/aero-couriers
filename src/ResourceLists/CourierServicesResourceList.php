@@ -47,14 +47,16 @@ class CourierServicesResourceList extends AbstractResourceList
                 return $row->service_type;
             }),
             ResourceListColumn::create('', function ($row) {
-                if ($row->id === $this->selected) {
-                    return view('couriers::resource-lists.cancel-link', [
-                        'route' => route('admin.courier-manager.services.index', array_merge(request()->all())),
-                    ])->render();
-                } else {
-                    return view('admin::resource-lists.manage-link', [
-                        'route' => route('admin.courier-manager.services.edit', array_merge(request()->all(), ['service' => $row])),
-                    ])->render();
+                if (!array_key_exists('deleted', $this->parameters)) {
+                    if ($row->id === $this->selected) {
+                        return view('couriers::resource-lists.cancel-link', [
+                            'route' => route('admin.courier-manager.services.index', array_merge(request()->all())),
+                        ])->render();
+                    } else {
+                        return view('admin::resource-lists.manage-link', [
+                            'route' => route('admin.courier-manager.services.edit', array_merge(request()->all(), ['service' => $row])),
+                        ])->render();
+                    }
                 }
             }, 'action'),
         ];
