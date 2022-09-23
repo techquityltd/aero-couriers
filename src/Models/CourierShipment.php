@@ -135,7 +135,7 @@ class CourierShipment extends Model
         ]);
 
         $this->orders->each(function (Order $order) {
-            $this->driver::determineOrderStatus($order, $this);
+            $order->setOrderStatus($this->driver::determineOrderStatus($order, $this));
         });
 
         event(new ShipmentCommitted($this));
@@ -157,7 +157,7 @@ class CourierShipment extends Model
         $this->fulfillments->each->update(['state' => Fulfillment::FAILED]);
 
         $this->orders->each(function (Order $order) {
-            $this->driver::determineOrderStatus($order, $this);
+            $order->setOrderStatus($this->driver::determineOrderStatus($order, $this));
         });
 
         event(new ShipmentFailed($this));
@@ -177,7 +177,7 @@ class CourierShipment extends Model
         ]);
 
         $this->orders->each(function (Order $order) {
-            $this->driver::determineOrderStatus($order, $this);
+            $order->setOrderStatus($this->driver::determineOrderStatus($order, $this));
         });
 
         event(new ShipmentCanceled($this));
@@ -196,7 +196,7 @@ class CourierShipment extends Model
         $this->fulfillments->each->update(['state' => Fulfillment::SUCCESSFUL]);
 
         $this->orders->each(function (Order $order) {
-            $this->driver::determineOrderStatus($order, $this);
+            $order->setOrderStatus($this->driver::determineOrderStatus($order, $this));
         });
 
         event(new ShipmentCollected($this));
