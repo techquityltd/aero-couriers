@@ -2,13 +2,13 @@
 
 namespace Techquity\Aero\Couriers\BulkActions;
 
-use Aero\Admin\Jobs\BulkActionJob;
+use Techquity\Aero\Couriers\Abstracts\AbstractQueueableBulkAction;
 use Techquity\Aero\Couriers\Actions\CollectShipments;
 use Techquity\Aero\Couriers\Models\CourierShipment;
 use Techquity\Aero\Couriers\ResourceLists\CourierShipmentsResourceList;
 use Techquity\Aero\Couriers\Traits\UsesCourierDriver;
 
-class CollectShipmentsBulkAction extends BulkActionJob
+class CollectShipmentsBulkAction extends AbstractQueueableBulkAction
 {
     use UsesCourierDriver;
 

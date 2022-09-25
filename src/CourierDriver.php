@@ -20,6 +20,11 @@ class CourierDriver extends FulfillmentDriver
     protected $shipments;
 
     /**
+     * The queue courier jobs should use.
+     */
+    public static string $queue = 'couriers';
+
+    /**
      * The default fulfillment state of a fulfillment when created.
      *
      * @return string

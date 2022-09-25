@@ -2,11 +2,11 @@
 
 namespace Techquity\Aero\Couriers\BulkActions;
 
-use Aero\Admin\Jobs\BulkActionJob;
+use Techquity\Aero\Couriers\Abstracts\AbstractQueueableBulkAction;
 use Techquity\Aero\Couriers\Models\CourierConnector;
 use Techquity\Aero\Couriers\ResourceLists\CourierConnectorsResourceList;
 
-class DeleteCourierConnectorsBulkAction extends BulkActionJob
+class DeleteCourierConnectorsBulkAction extends AbstractQueueableBulkAction
 {
     protected $list;
 

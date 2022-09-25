@@ -2,16 +2,16 @@
 
 namespace Techquity\Aero\Couriers\BulkActions;
 
-use Aero\Admin\Jobs\BulkActionJob;
 use Aero\Admin\ResourceLists\OrdersResourceList;
 use Aero\Cart\Models\Order;
 use Aero\Fulfillment\Models\Fulfillment;
+use Techquity\Aero\Couriers\Abstracts\AbstractQueueableBulkAction;
 use Techquity\Aero\Couriers\Actions\CommitShipments;
 use Techquity\Aero\Couriers\Actions\CreateFulfillment;
 use Techquity\Aero\Couriers\Actions\CreateShipment;
 use Techquity\Aero\Couriers\Traits\UsesCourierDriver;
 
-class ShipOrdersBulkAction extends BulkActionJob
+class ShipOrdersBulkAction extends AbstractQueueableBulkAction
 {
     use UsesCourierDriver;
 
