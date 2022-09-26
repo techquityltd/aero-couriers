@@ -15,5 +15,7 @@ class CommitShipments
 
             (new $driver())->setShipments($shipments)->commit();
         });
+
+        return true;
     }
 }
