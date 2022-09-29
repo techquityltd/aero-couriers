@@ -93,6 +93,16 @@ class CourierServicesResourceList extends AbstractResourceList
         return $this->resource->newQuery();
     }
 
+    protected function handleSearch($search)
+    {
+        $this->query->where(function ($query) use ($search) {
+            $query->whereLower('description', 'like', "%{$search}%")
+                ->orWhereLower('service_type', 'like', "%{$search}%")
+                ->orWhereLower('service_code', 'like', "%{$search}%")
+                ->orWhereLower('carrier', 'like', "%{$search}%");
+        });
+    }
+
     public function backButtonLink()
     {
         if (array_key_exists('deleted', $this->parameters)) {

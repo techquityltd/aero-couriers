@@ -67,6 +67,15 @@ class CourierConnectorsResourceList extends AbstractResourceList
         ];
     }
 
+    protected function handleSearch($search)
+    {
+        $this->query->where(function ($query) use ($search) {
+            $query->whereLower('name', 'like', "%{$search}%")
+                ->orWhereLower('carrier', 'like', "%{$search}%")
+                ->orWhereLower('user', 'like', "%{$search}%");
+        });
+    }
+
     public function backButtonLink()
     {
         return route('admin.courier-manager.shipments.index');
