@@ -150,6 +150,12 @@
                 @if(!$fulfillment->isOpen())
                     disableCourierOptions();
                 @endif
+
+                @if($shipment->committed)
+                    toggleTrackingForm(false);
+                    document.getElementById("tracking-code").disabled = true;
+                    document.getElementById("tracking-url").disabled = true;
+                @endif
             @endisset
         });
     </script>
