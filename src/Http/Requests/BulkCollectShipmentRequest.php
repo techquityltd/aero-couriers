@@ -4,7 +4,7 @@ namespace Techquity\Aero\Couriers\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CourierCommitRequest extends FormRequest
+class BulkCollectShipmentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,8 +24,7 @@ class CourierCommitRequest extends FormRequest
     public function rules()
     {
         return [
-            'connector' => 'exists:courier_connectors,id',
-            'carrier' => 'exists:courier_services,carrier',
+            'carrier' => 'required|exists:courier_connectors,carrier',
         ];
     }
 }

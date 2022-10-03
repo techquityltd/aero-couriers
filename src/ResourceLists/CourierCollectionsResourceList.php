@@ -28,10 +28,10 @@ class CourierCollectionsResourceList extends AbstractResourceList
                 return $row->shipments()->first()->courierService->carrier;
             }),
             ResourceListColumn::create('From Date', function ($row) {
-                return $row->shipments()->latest()->first()->created_at;
+                return $row->shipments()->oldest()->first()->created_at;
             }),
             ResourceListColumn::create('To Date', function ($row) {
-                return $row->shipments()->oldest()->first()->created_at;
+                return $row->shipments()->latest()->first()->created_at;
             }),
             ResourceListColumn::create('Shipments', function ($row) {
                 return $row->shipments()->count();

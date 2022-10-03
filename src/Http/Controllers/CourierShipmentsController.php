@@ -9,14 +9,19 @@ use Illuminate\Support\Facades\Storage;
 use Techquity\Aero\Couriers\Actions\CollectShipments;
 use Techquity\Aero\Couriers\Actions\CommitShipments;
 use Techquity\Aero\Couriers\Actions\DeleteFulfillment;
+use Techquity\Aero\Couriers\Http\Requests\BulkCollectShipmentRequest;
 use Techquity\Aero\Couriers\Models\CourierShipment;
 use Techquity\Aero\Couriers\ResourceLists\CourierShipmentsResourceList;
+use Techquity\Aero\Couriers\Traits\UsesCourierDriver;
 
 class CourierShipmentsController extends Controller
 {
+    use UsesCourierDriver;
+
     public function index(CourierShipmentsResourceList $list, Request $request)
     {
-        return view('admin::resource-lists.index', [
+        return view('couriers::resource-lists.shipments', [
+            'carriers' => $this->getCourierDrivers(),
             'list' => $list = $list(),
             'results' => $list->apply($request->all())
                 ->paginate($request->input('per_page', 24) ?? 24),
@@ -70,6 +75,27 @@ class CourierShipmentsController extends Controller
 
         return redirect()->back()->with([
             'error' => __('There was an issue marking the shipment as collected.'),
+        ]);
+    }
+
+    public function bulkCollect(BulkCollectShipmentRequest $request)
+    {
+        $shipments = CourierShipment::query()
+            ->whereDoesntHave('courierCollection')
+            ->whereHas('courierConnector', function ($query) use ($request) {
+                $query->where('carrier', $request->input('carrier'));
+            })
+            ->where('committed', true)
+            ->cursor();
+
+        if ((new CollectShipments())($shipments)) {
+            return redirect()->back()->with([
+                'message' => __('Shipments successfully marked as collected.'),
+            ]);
+        }
+
+        return redirect()->back()->with([
+            'error' => __('There was an issue marking the shipments as collected.'),
         ]);
     }
 
