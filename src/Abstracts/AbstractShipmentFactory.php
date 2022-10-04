@@ -72,7 +72,7 @@ class AbstractShipmentFactory implements ShipmentFactory
         );
     }
 
-    public function convertWeight(int $weight, string $unit): float
+    public function convertWeight(float $weight, string $unit): float
     {
         switch (strtolower($unit)) {
             case 'kg':
