@@ -138,10 +138,6 @@ class CouriersServiceProvider extends ModuleServiceProvider
         BulkAction::create(ShipOrdersBulkAction::class, OrdersResourceList::class)
             ->title('Ship Orders')
             ->permissions('couriers.manage-shipments');
-
-        BulkAction::create(DownloadLabelsBulkAction::class, CourierShipmentsResourceList::class)
-            ->title('Download Labels')
-            ->permissions('couriers.manage-shipments');
     }
 
     /**
