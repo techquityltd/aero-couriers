@@ -18,7 +18,7 @@ class DownloadLabelsBulkAction extends BulkActionJob
     {
         $this->list = $list;
 
-        $this->path = 'labels/' . date('Y_m_d_His') . '_bulk.php';
+        $this->path = 'labels/' . date('Y_m_d_His') . '_bulk.pdf';
     }
 
     public function handle()
