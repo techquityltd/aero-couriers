@@ -26,6 +26,14 @@ class DownloadLabelsBulkAction extends BulkActionJob
         $merger = new Merger();
 
         $this->list->items()->each(function (CourierShipment $shipment) use ($merger) {
+            /**
+             * Can only merge PDF files
+             * For others we may need to add the option to download as a zip
+             */
+            if (pathinfo(Storage::path($shipment->label), PATHINFO_EXTENSION) !== 'pdf') {
+                return;
+            }
+
             return $merger->addFile(Storage::path($shipment->label));
         });
 
