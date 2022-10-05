@@ -18,6 +18,7 @@ use Techquity\Aero\Couriers\BulkActions\CollectShipmentsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\CommitCourierShipmentsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\DeleteCourierConnectorsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\DeleteCourierServicesBulkAction;
+use Techquity\Aero\Couriers\BulkActions\DownloadLabelsBulkAction;
 use Techquity\Aero\Couriers\Models\{CourierConnector, CourierService, CourierShipment};
 use Techquity\Aero\Couriers\ResourceLists\CourierConnectorsResourceList;
 use Techquity\Aero\Couriers\ResourceLists\CourierServicesResourceList;
@@ -136,6 +137,10 @@ class CouriersServiceProvider extends ModuleServiceProvider
 
         BulkAction::create(ShipOrdersBulkAction::class, OrdersResourceList::class)
             ->title('Ship Orders')
+            ->permissions('couriers.manage-shipments');
+
+        BulkAction::create(DownloadLabelsBulkAction::class, CourierShipmentsResourceList::class)
+            ->title('Download Labels')
             ->permissions('couriers.manage-shipments');
     }
 

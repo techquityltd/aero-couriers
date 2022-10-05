@@ -17,9 +17,10 @@
     ],
     "require": {
         "php": "^7.4|^8.0",
-        "aerocommerce/admin": "^1.9.10",
+        "aerocommerce/admin": "^1",
         "aerocommerce/core": "^0",
         "guzzlehttp/guzzle": "^6.3.1|^7.0.1",
+        "iio/libmergepdf": "^4.0",
         "illuminate/support": "^6.0"
     },
     "autoload": {
