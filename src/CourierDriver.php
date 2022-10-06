@@ -2,15 +2,16 @@
 
 namespace Techquity\Aero\Couriers;
 
+use Aero\Admin\Models\Admin;
 use Aero\Cart\Models\Order;
 use Aero\Cart\Models\OrderStatus;
 use Aero\Fulfillment\FulfillmentDriver;
 use Aero\Fulfillment\Models\Fulfillment;
 use Aero\Fulfillment\Responses\FulfillmentResponse;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 use Techquity\Aero\Couriers\Models\CourierCollection;
 use Techquity\Aero\Couriers\Models\CourierShipment;
+use Techquity\Aero\Couriers\Models\PendingLabel;
 
 class CourierDriver extends FulfillmentDriver
 {
@@ -18,6 +19,10 @@ class CourierDriver extends FulfillmentDriver
      * The shipments.
      */
     protected $shipments;
+
+    protected $admin;
+
+    protected $autoPrintLabels = false;
 
     /**
      * The queue courier jobs should use.
@@ -40,6 +45,14 @@ class CourierDriver extends FulfillmentDriver
     public function setShipments($shipments): self
     {
         $this->shipments = $shipments;
+
+        return $this;
+    }
+
+    public function labelsShouldAutoPrint(Admin $admin): self
+    {
+        $this->admin = $admin;
+        $this->autoPrintLabels = true;
 
         return $this;
     }
@@ -159,5 +172,17 @@ class CourierDriver extends FulfillmentDriver
             ->map(fn (Order $order) => $order->fulfillments)
             ->flatten()
             ->reject(fn (Fulfillment $fulfillment) => $fulfillment->courierShipment->is($shipment));
+    }
+
+    public function __destruct()
+    {
+        if ($this->autoPrintLabels) {
+            $this->shipments->each(function ($shipment) {
+                (new PendingLabel([
+                    'label' => $shipment->label,
+                    'admin_id' => $this->admin->id
+                ]))->save();
+            });
+        }
     }
 }

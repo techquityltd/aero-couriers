@@ -5,6 +5,7 @@ namespace Techquity\Aero\Couriers\BulkActions;
 use Aero\Admin\ResourceLists\OrdersResourceList;
 use Aero\Cart\Models\Order;
 use Aero\Fulfillment\Models\Fulfillment;
+use Illuminate\Support\Facades\Auth;
 use Techquity\Aero\Couriers\Abstracts\AbstractQueueableBulkAction;
 use Techquity\Aero\Couriers\Actions\CommitShipments;
 use Techquity\Aero\Couriers\Actions\CreateFulfillment;
@@ -17,9 +18,12 @@ class ShipOrdersBulkAction extends AbstractQueueableBulkAction
 
     protected $list;
 
+    protected $admin;
+
     public function __construct(OrdersResourceList $list)
     {
         $this->list = $list;
+        $this->admin = Auth::user();
     }
 
     public function handle(): void
@@ -39,7 +43,7 @@ class ShipOrdersBulkAction extends AbstractQueueableBulkAction
             ->all();
 
         if (count($shipments)) {
-            (new CommitShipments())(collect($shipments));
+            (new CommitShipments())(collect($shipments), $this->admin);
         }
     }
 }

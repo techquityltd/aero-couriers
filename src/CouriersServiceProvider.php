@@ -18,8 +18,7 @@ use Techquity\Aero\Couriers\BulkActions\CollectShipmentsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\CommitCourierShipmentsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\DeleteCourierConnectorsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\DeleteCourierServicesBulkAction;
-use Techquity\Aero\Couriers\BulkActions\DownloadLabelsBulkAction;
-use Techquity\Aero\Couriers\Models\{CourierConnector, CourierService, CourierShipment};
+use Techquity\Aero\Couriers\Models\{CourierConnector, CourierService, CourierShipment, PendingLabel};
 use Techquity\Aero\Couriers\ResourceLists\CourierConnectorsResourceList;
 use Techquity\Aero\Couriers\ResourceLists\CourierServicesResourceList;
 use Techquity\Aero\Couriers\BulkActions\MergeCourierShipmentsBulkAction;
@@ -74,6 +73,10 @@ class CouriersServiceProvider extends ModuleServiceProvider
                     return optional($row->courierShipment->courierService)->carrier;
                 }
             }, 'orders');
+        });
+
+        AdminSlot::inject('orders.index.header.buttons', function ($_) {
+            return view('couriers::slots.pending-labels');
         });
 
         $this->configureCourierManagerModule();

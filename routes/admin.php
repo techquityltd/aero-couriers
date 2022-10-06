@@ -15,6 +15,7 @@ Route::prefix('/courier/shipments')->middleware('can:couriers.manage-shipments')
     Route::delete('/delete/{fulfillment}', [CourierShipmentsController::class, 'delete'])->name('delete');
     Route::get('/request/{shipment}', [CourierShipmentsController::class, 'request'])->name('request');
     Route::get('/response/{shipment}', [CourierShipmentsController::class, 'response'])->name('response');
+    Route::post('/pending-labels', [CourierShipmentsController::class, 'pendingLabels'])->name('pending-labels');
 });
 
 Route::prefix('/courier/connectors')->middleware('can:couriers.manage-connectors')->name('admin.courier-manager.connectors.')->group(function () {

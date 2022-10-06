@@ -5,12 +5,14 @@ namespace Techquity\Aero\Couriers\Http\Controllers;
 use Aero\Admin\Http\Controllers\Controller;
 use Aero\Fulfillment\Models\Fulfillment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Techquity\Aero\Couriers\Actions\CollectShipments;
 use Techquity\Aero\Couriers\Actions\CommitShipments;
 use Techquity\Aero\Couriers\Actions\DeleteFulfillment;
 use Techquity\Aero\Couriers\Http\Requests\BulkCollectShipmentRequest;
 use Techquity\Aero\Couriers\Models\CourierShipment;
+use Techquity\Aero\Couriers\Models\PendingLabel;
 use Techquity\Aero\Couriers\ResourceLists\CourierShipmentsResourceList;
 use Techquity\Aero\Couriers\Traits\UsesCourierDriver;
 
@@ -111,5 +113,23 @@ class CourierShipmentsController extends Controller
         return response($shipment->response, 200, [
             'Content-Type' => 'application/json'
         ]);
+    }
+
+    public function pendingLabels()
+    {
+        $pendingLabel = PendingLabel::query()
+            ->whereHas('admin', fn ($q) => $q->where('id', Auth::user()->id))
+            ->cursor()
+            ->filter(function ($label) {
+                return Storage::exists($label->label);
+            })->first();
+
+        if ($pendingLabel) {
+            $pendingLabel->delete();
+
+            return Storage::download($pendingLabel->label);
+        }
+
+        return response()->json([]);
     }
 }
