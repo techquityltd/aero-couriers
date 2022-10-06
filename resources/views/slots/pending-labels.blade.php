@@ -1,6 +1,6 @@
 @push('scripts')
     <script>
-        var labelDownloaderStop = false;
+        var pauseLabelDownloader = 0;
 
         const downloadNextAvailableLabel = async () => {
             await axios({
@@ -22,16 +22,17 @@
                 document.body.appendChild(link);
                 link.click();
                 link.remove();
+
+                pauseLabelDownloader = 0;
             }).catch((error) => {
-                labelDownloaderStop = true;
+                // Add 5 seconds after each fail
+                pauseLabelDownloader = pauseLabelDownloader + 5000;
             });
 
-            // Wait 3 seconds before getting more
-            await new Promise(resolve => setTimeout(resolve, 3000));
+            // Wait 3 seconds + the pause before getting more
+            await new Promise(resolve => setTimeout(resolve, 3000 + pauseLabelDownloader));
 
-            if (!labelDownloaderStop) {
-                downloadNextAvailableLabel();
-            }
+            downloadNextAvailableLabel();
         }
 
         downloadNextAvailableLabel();
