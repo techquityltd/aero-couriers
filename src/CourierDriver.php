@@ -9,6 +9,7 @@ use Aero\Fulfillment\FulfillmentDriver;
 use Aero\Fulfillment\Models\Fulfillment;
 use Aero\Fulfillment\Responses\FulfillmentResponse;
 use Illuminate\Support\Collection;
+use Techquity\Aero\Couriers\Actions\CommitShipments;
 use Techquity\Aero\Couriers\Models\CourierCollection;
 use Techquity\Aero\Couriers\Models\CourierShipment;
 use Techquity\Aero\Couriers\Models\PendingLabel;
@@ -143,9 +144,17 @@ class CourierDriver extends FulfillmentDriver
      */
     public function handle(): FulfillmentResponse
     {
-        // When you process a fulfillment this should determine what stage the shipment is at
-        // once decided if compatible run the shipment to the next step
-        return $this->response;
+        $this->fulfillments
+            ->reject(fn (Fulfillment $fulfillment) => $fulfillment->courierShipment->committed)
+            ->each(function (Fulfillment $fulfillment) {
+                (new CommitShipments())(collect([$fulfillment->courierShipment]), $this->admin);
+            });
+
+        $response = new FulfillmentResponse();
+
+        $response->setSuccessful(true);
+
+        return $response;
     }
 
     /**
