@@ -15,9 +15,9 @@ class UpdateFulfillmentShipment implements ResponseStep
             return $next($builder);
         }
 
-        $this->shipment->courierService()->associate($builder->request->service);
-        $this->shipment->courierConnector()->associate($builder->request->connector);
-        $this->shipment->save();
+        $fulfillment->courierShipment->courierService()->associate($builder->request->service);
+        $fulfillment->courierShipment->courierConnector()->associate($builder->request->connector);
+        $fulfillment->courierShipment->save();
 
         return $next($builder);
     }
