@@ -231,4 +231,9 @@ class CourierShipment extends Model
 
         return $this;
     }
+
+    public function getIsCsvResponseAttribute()
+    {
+        return method_exists($this->driver, 'downloadCsv');
+    }
 }

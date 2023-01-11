@@ -12,6 +12,7 @@ Route::prefix('/courier/shipments')->middleware('can:couriers.manage-shipments')
     Route::put('/collect/{fulfillment}', [CourierShipmentsController::class, 'collect'])->name('collect');
     Route::put('/collect', [CourierShipmentsController::class, 'bulkCollect'])->name('bulk-collect');
     Route::post('/print/{shipment}', [CourierShipmentsController::class, 'print'])->name('print');
+    Route::post('/csv/{shipment}', [CourierShipmentsController::class, 'csv'])->name('csv');
     Route::delete('/delete/{fulfillment}', [CourierShipmentsController::class, 'delete'])->name('delete');
     Route::get('/request/{shipment}', [CourierShipmentsController::class, 'request'])->name('request');
     Route::get('/response/{shipment}', [CourierShipmentsController::class, 'response'])->name('response');

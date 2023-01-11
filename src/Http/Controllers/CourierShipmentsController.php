@@ -41,6 +41,19 @@ class CourierShipmentsController extends Controller
         return Storage::download($shipment->label);
     }
 
+    public function csv(CourierShipment $shipment)
+    {
+        if (!$shipment->committed || !$shipment->isCsvResponse) {
+            return back()->with([
+                'error' => __('This shipment is unavailble for CSV download.'),
+            ]);
+        }
+
+        $driver = (new $shipment->driver())->setShipments($shipment);
+
+        return $driver->downloadCsv();
+    }
+
     public function delete(Fulfillment $fulfillment)
     {
         if ((new DeleteFulfillment())($fulfillment)) {

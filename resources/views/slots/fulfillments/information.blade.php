@@ -3,10 +3,16 @@
         <h3>Manage Fulfillment</h3>
     </div>
     <div class="w-full flex">
-        @if($shipment->consignment_number)
+        @if($shipment->consignment_number && $shipment->label)
             <form class="w-1/3 mx-1" action="{{ route('admin.courier-manager.shipments.print', $shipment) }}" method="post">
                 @csrf
                 <button class="w-full btn btn-secondary" type="submit">Print Label</button>
+            </form>
+        @endif
+        @if($shipment->committed && $shipment->isCsvResponse)
+            <form class="w-1/3 mx-1" action="{{ route('admin.courier-manager.shipments.csv', $shipment) }}" method="post">
+                @csrf
+                <button class="w-full btn btn-secondary" type="submit">Download CSV</button>
             </form>
         @endif
         @if(!$shipment->committed)
