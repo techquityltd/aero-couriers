@@ -39,17 +39,19 @@ class CourierConnector extends Model
     /**
      * Get the connectors decrypted token.
      */
-    public function getTokenAttribute(string $value): ?string
+    public function getTokenAttribute(?string $value): ?string
     {
-        return decrypt($value);
+        return $value ? decrypt($value) : '';
     }
 
     /**
      * Set the connectors encrypted token.
      */
-    public function setTokenAttribute(string $value): void
+    public function setTokenAttribute(?string $value): void
     {
-        $this->attributes['token'] = encrypt($value);
+        if ($value) {
+            $this->attributes['token'] = encrypt($value);
+        }
     }
 
     /**
