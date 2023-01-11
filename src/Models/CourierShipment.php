@@ -123,14 +123,14 @@ class CourierShipment extends Model
     public function markAsCommitted(?AbstractResponse $response = null): self
     {
         $this->update([
-            'consignment_number' => $response->getConsignmentNumber() ?? Str::random(),
-            'label' => $response->getLabel() ?? null,
+            'consignment_number' => ($response ? $response->getConsignmentNumber() : null) ?? Str::random(),
+            'label' => ($response ? $response->getLabel() : null) ?? null,
             'committed' => true,
         ]);
 
         $this->fulfillments->each->update([
-            'tracking_code' => $response->getTrackingNumber() ?? '',
-            'tracking_url' => $response->getTrackingUrl() ?? '',
+            'tracking_code' => ($response ? $response->getTrackingNumber() : null) ?? '',
+            'tracking_url' => ($response ? $response->getTrackingUrl() : null) ?? '',
             'state' => Fulfillment::SUCCESSFUL
         ]);
 
