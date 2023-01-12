@@ -7,6 +7,7 @@ use Aero\Fulfillment\Models\Fulfillment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Excel;
 use Techquity\Aero\Couriers\Actions\CollectShipments;
 use Techquity\Aero\Couriers\Actions\CommitShipments;
 use Techquity\Aero\Couriers\Actions\DeleteFulfillment;
@@ -49,7 +50,7 @@ class CourierShipmentsController extends Controller
             ]);
         }
 
-        $driver = (new $shipment->driver())->setShipments($shipment);
+        $driver = (new $shipment->driver())->setShipments(collect([$shipment]));
 
         return $driver->generateCsv()->download($driver->generateCsvFileName(), Excel::CSV, ['Content-Type' => 'text/csv']);;
     }
