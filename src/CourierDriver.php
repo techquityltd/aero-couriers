@@ -13,6 +13,7 @@ use Techquity\Aero\Couriers\Actions\CommitShipments;
 use Techquity\Aero\Couriers\Models\CourierCollection;
 use Techquity\Aero\Couriers\Models\CourierShipment;
 use Techquity\Aero\Couriers\Models\PendingLabel;
+use Illuminate\Database\Eloquent;
 
 class CourierDriver extends FulfillmentDriver
 {
@@ -45,7 +46,7 @@ class CourierDriver extends FulfillmentDriver
      */
     public function setShipments($shipments): self
     {
-        $this->shipments = $shipments;
+        $this->shipments = ($shipments instanceof Model ? collect([$shipments]) : $shipments);
 
         return $this;
     }
@@ -186,11 +187,29 @@ class CourierDriver extends FulfillmentDriver
     public function __destruct()
     {
         if ($this->autoPrintLabels) {
-            $this->shipments->each(function ($shipment) {
-                (new PendingLabel([
-                    'label' => $shipment->label,
-                    'admin_id' => $this->admin->id
-                ]))->save();
+
+            $this->shipments->groupBy('courier_connector_id')->each(function ($shipments) {
+
+                $firstShipment = $shipments->first();
+
+                if ($firstShipment->isCsvResponse) {
+                    $driver = (new $firstShipment->driver())->setShipments($shipments);
+                    $fileName = $driver->generateCsvFileName();
+                    $driver->generateCsv()->store($fileName);
+
+                    (new PendingLabel([
+                        'label' => $fileName,
+                        'admin_id' => $this->admin->id
+                    ]))->save();
+
+                } else {
+                    $shipments->each(function ($shipment) {
+                        (new PendingLabel([
+                            'label' => $shipment->label,
+                            'admin_id' => $this->admin->id
+                        ]))->save();
+                    });
+                }
             });
         }
     }

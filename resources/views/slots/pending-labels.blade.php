@@ -12,9 +12,8 @@
                 },
                 responseType: "blob",
             }).then((response) => {
-                let filename = response.headers['content-disposition'].split('filename=')[1].split('.')[0];
-                let extension = response.headers['content-disposition'].split('.')[1].split(';')[0];
-
+                let filename = response.headers['content-disposition'].split('filename=')[1].split('.')[0].replace(/['"]+/g, '');
+                let extension = response.headers['content-disposition'].split('.')[1].split(';')[0].replace(/['"]+/g, '');
                 const url = window.URL.createObjectURL(new Blob([response.data]));
                 const link = document.createElement("a");
                 link.href = url;

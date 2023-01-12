@@ -51,7 +51,7 @@ class CourierShipmentsController extends Controller
 
         $driver = (new $shipment->driver())->setShipments($shipment);
 
-        return $driver->downloadCsv();
+        return $driver->generateCsv()->download($driver->generateCsvFileName(), Excel::CSV, ['Content-Type' => 'text/csv']);;
     }
 
     public function delete(Fulfillment $fulfillment)
