@@ -25,7 +25,7 @@ class CourierCollectionsResourceList extends AbstractResourceList
                 return $row->shipments()->first()->courierConnector->name;
             }),
             ResourceListColumn::create('Carrier', function ($row) {
-                return $row->shipments()->first()->courierService->carrier;
+                return $row->shipments()->first()->courierService->carrier ?? '';
             }),
             ResourceListColumn::create('From Date', function ($row) {
                 return $row->shipments()->oldest()->first()->created_at;
