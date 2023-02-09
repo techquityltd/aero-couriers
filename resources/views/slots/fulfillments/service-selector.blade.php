@@ -1,51 +1,54 @@
-<div class="courier-form card w-full my-4 hidden">
-    <h3 class="mb-px">Courier</h3>
-    <div class="mt-4 flex">
-        @isset($services)
-            <div class="w-1/3">
-                <div class="px-2 mb-4">
-                    <label for="courier-service" class="block">Service</label>
-                    <div class="select w-full">
-                        <select id="courier-service" name="service" class="w-full"
-                            @if (isset($fulfillment) && !$fulfillment->isOpen()) disabled @endif>
-                            <option value="">Manual</option>
-                            @foreach ($services as $carrier => $group)
-                                @foreach ($group as $key => $item)
-                                    <option data-courier="{{ $carrier }}" value="{{ $key }}" class="hidden"
-                                        @if ($selectedService === $key) selected @endif>
-                                        {{ $item }}
-                                    </option>
-                                @endforeach
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-            </div>
-        @endisset
 
-        @isset($connectors)
-            <div class="w-1/3">
-                <div class="px-2 mb-4">
-                    <label for="courier-connector" class="block">Connector</label>
-                    <div class="select w-full">
-                        <select id="courier-connector" name="connector" class="w-full"
-                            @if (isset($fulfillment) && !$fulfillment->isOpen()) disabled @endif>
-                            <option value="">Manual</option>
-                            @foreach ($connectors as $carrier => $group)
-                                @foreach ($group as $key => $item)
-                                    <option data-courier="{{ $carrier }}" value="{{ $key }}" class="hidden"
-                                        @if ($selectedConnector === $key) selected @endif>
-                                        {{ $item }}
-                                    </option>
+@if((request()->query('override-method') || Route::currentRouteName() !== 'admin.orders.fulfillments.new') && Route::currentRouteName() !== 'admin.orders.fulfillments.edit')
+    <div class="courier-form card w-full my-4 hidden">
+        <h3 class="mb-px">Courier</h3>
+        <div class="mt-4 flex">
+            @isset($services)
+                <div class="w-1/3">
+                    <div class="px-2 mb-4">
+                        <label for="courier-service" class="block">Service</label>
+                        <div class="select w-full">
+                            <select id="courier-service" name="service" class="w-full"
+                                @if (isset($fulfillment) && !$fulfillment->isOpen()) disabled @endif>
+                                <option value="">Manual</option>
+                                @foreach ($services as $carrier => $group)
+                                    @foreach ($group as $key => $item)
+                                        <option data-courier="{{ $carrier }}" value="{{ $key }}" class="hidden"
+                                            @if ($selectedService === $key) selected @endif>
+                                            {{ $item }}
+                                        </option>
+                                    @endforeach
                                 @endforeach
-                            @endforeach
-                        </select>
+                            </select>
+                        </div>
                     </div>
                 </div>
-            </div>
-        @endisset
+            @endisset
+
+            @isset($connectors)
+                <div class="w-1/3">
+                    <div class="px-2 mb-4">
+                        <label for="courier-connector" class="block">Connector</label>
+                        <div class="select w-full">
+                            <select id="courier-connector" name="connector" class="w-full"
+                                @if (isset($fulfillment) && !$fulfillment->isOpen()) disabled @endif>
+                                <option value="">Manual</option>
+                                @foreach ($connectors as $carrier => $group)
+                                    @foreach ($group as $key => $item)
+                                        <option data-courier="{{ $carrier }}" value="{{ $key }}" class="hidden"
+                                            @if ($selectedConnector === $key) selected @endif>
+                                            {{ $item }}
+                                        </option>
+                                    @endforeach
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            @endisset
+        </div>
     </div>
-</div>
+@endif
 
 @push('scripts')
     <script>
@@ -128,6 +131,16 @@
             @isset($courierMethods)
                 const courierMethods = @json($courierMethods);
                 const methodSelector = document.getElementById("fulfillment-method");
+
+                // Build the override link..
+                const fulfillmentMethodLabel = document.querySelector("label[for='fulfillment-method']");
+
+                var overrideLink = document.createElement('a');
+                var linkText = document.createTextNode(@if(!request()->query('override-method'))"Override"@else"Default"@endif);
+                overrideLink.appendChild(linkText);
+                overrideLink.href = "{{ url()->current() }}" @if(!request()->query('override-method')) + "?override-method=true" @endif;
+                overrideLink.classList = "ml-2 text-xs font-thin underline"
+                fulfillmentMethodLabel.appendChild(overrideLink);
 
                 if (Object.keys(courierMethods).length) {
                     methodSelector.addEventListener("change", function(event) {

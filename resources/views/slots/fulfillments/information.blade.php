@@ -51,6 +51,19 @@
                     <span class="pl-orb align-middle">@if($shipment->isComplete()) Collected @elseif($shipment->committed) Committed @elseif($shipment->failed) Failed @else Pending @endif</span>
             </span>
         </div>
+
+        @if($shipment->courierConnector && $shipment->courierService)
+            <label class="block">Courier</label>
+            <div class="mt-2 mb-4">
+                {{ $shipment->courierConnector->carrier }}
+            </div>
+
+            <label class="block">Service</label>
+            <div class="mt-2 mb-4">
+                {{ $shipment->courierService->name ?? $shipment->courierService->description }}
+            </div>
+        @endif
+
         @if($shipment->isComplete())
             <label class="block">Collected On</label>
             <div class="mt-2 mb-4">

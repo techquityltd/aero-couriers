@@ -184,6 +184,12 @@ class CouriersServiceProvider extends ModuleServiceProvider
          */
         AdminOrderFulfillmentCreatePage::extend(function (ResponseBuilder $builder) {
             $this->attachCourierOptionsData($builder);
+
+            // Allows us to completetly override the method...
+            if (request()->query('override-method')) {
+                $builder->setData('methods', FulfillmentMethod::ordered()->get());
+            }
+
             $this->attachCourierMethods($builder);
 
             AdminSlot::inject('orders.fulfillment.new.cards', static::$selector_view);
