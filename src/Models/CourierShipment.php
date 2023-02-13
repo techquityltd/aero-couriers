@@ -34,6 +34,7 @@ class CourierShipment extends Model
         'cancelled',
         'failed_messages',
         'label',
+        'labels',
     ];
 
     /**
@@ -43,6 +44,7 @@ class CourierShipment extends Model
      */
     protected $casts = [
         'failed_messages' => 'array',
+        'labels' => 'array'
     ];
 
     /**
@@ -126,7 +128,8 @@ class CourierShipment extends Model
     {
         $this->update([
             'consignment_number' => ($response ? $response->getConsignmentNumber() : null) ?? Str::random(),
-            'label' => ($response ? $response->getLabel() : null) ?? null,
+            'label' => ($response && is_string($response->getLabel()) ? $response->getLabel() : null) ?? null,
+            'labels' => ($response && is_array($response->getLabel()) ? $response->getLabel() : null) ?? null,
             'committed' => true,
         ]);
 
