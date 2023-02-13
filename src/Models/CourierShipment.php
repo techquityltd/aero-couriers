@@ -114,7 +114,9 @@ class CourierShipment extends Model
      */
     public function getDriverAttribute()
     {
-        return $this->getCourierDrivers($this->courierService->carrier);
+        if ($this->courierService) {
+            return $this->getCourierDrivers($this->courierService->carrier);
+        }
     }
 
     /**
