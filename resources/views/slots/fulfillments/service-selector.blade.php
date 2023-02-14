@@ -1,54 +1,52 @@
-
-@if((request()->query('override-method') || Route::currentRouteName() !== 'admin.orders.fulfillments.new') && Route::currentRouteName() !== 'admin.orders.fulfillments.edit')
-    <div class="courier-form card w-full my-4 hidden">
-        <h3 class="mb-px">Courier</h3>
-        <div class="mt-4 flex">
-            @isset($services)
-                <div class="w-1/3">
-                    <div class="px-2 mb-4">
-                        <label for="courier-service" class="block">Service</label>
-                        <div class="select w-full">
-                            <select id="courier-service" name="service" class="w-full"
-                                @if (isset($fulfillment) && !$fulfillment->isOpen()) disabled @endif>
-                                <option value="">Manual</option>
-                                @foreach ($services as $carrier => $group)
-                                    @foreach ($group as $key => $item)
-                                        <option data-courier="{{ $carrier }}" value="{{ $key }}" class="hidden"
-                                            @if ($selectedService === $key) selected @endif>
-                                            {{ $item }}
-                                        </option>
-                                    @endforeach
+<div class="courier-form card w-full my-4 hidden">
+    <h3 class="mb-px">Courier</h3>
+    <div class="mt-4 flex">
+        @isset($services)
+            <div class="w-1/3">
+                <div class="px-2 mb-4">
+                    <label for="courier-service" class="block">Service</label>
+                    <div class="select w-full">
+                        <select id="courier-service" name="service" class="w-full"
+                            @if ((isset($fulfillment) || Route::currentRouteName() === 'admin.orders.fulfillments.new') && !request()->query('override-method')) disabled @endif>
+                            <option value="">Manual</option>
+                            @foreach ($services as $carrier => $group)
+                                @foreach ($group as $key => $item)
+                                    <option data-courier="{{ $carrier }}" value="{{ $key }}" class="hidden" @if ($selectedService === $key) selected @endif>
+                                        {{ $item }}
+                                    </option>
                                 @endforeach
-                            </select>
-                        </div>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
-            @endisset
+            </div>
+        @endisset
 
-            @isset($connectors)
-                <div class="w-1/3">
-                    <div class="px-2 mb-4">
-                        <label for="courier-connector" class="block">Connector</label>
-                        <div class="select w-full">
-                            <select id="courier-connector" name="connector" class="w-full"
-                                @if (isset($fulfillment) && !$fulfillment->isOpen()) disabled @endif>
-                                <option value="">Manual</option>
-                                @foreach ($connectors as $carrier => $group)
-                                    @foreach ($group as $key => $item)
-                                        <option data-courier="{{ $carrier }}" value="{{ $key }}" class="hidden"
-                                            @if ($selectedConnector === $key) selected @endif>
-                                            {{ $item }}
-                                        </option>
-                                    @endforeach
+        @isset($connectors)
+            <div class="w-1/3">
+                <div class="px-2 mb-4">
+                    <label for="courier-connector" class="block">Connector</label>
+                    <div class="select w-full">
+
+                        <select id="courier-connector" name="connector" class="w-full"
+                        @if ((isset($fulfillment) || Route::currentRouteName() === 'admin.orders.fulfillments.new') && !request()->query('override-method')) disabled @endif>
+                            <option value="">Manual</option>
+                            @foreach ($connectors as $carrier => $group)
+                                @foreach ($group as $key => $item)
+                                    <option data-courier="{{ $carrier }}" value="{{ $key }}" class="hidden"
+                                        @if ($selectedConnector === $key) selected @endif>
+                                        {{ $item }}
+                                    </option>
                                 @endforeach
-                            </select>
-                        </div>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
-            @endisset
-        </div>
+            </div>
+        @endisset
     </div>
-@endif
+</div>
+
 
 @push('scripts')
     <script>
