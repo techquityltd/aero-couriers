@@ -7,11 +7,12 @@
                     <label for="courier-service" class="block">Service</label>
                     <div class="select w-full">
                         <select id="courier-service" name="service" class="w-full"
-                            @if ((isset($fulfillment) || Route::currentRouteName() === 'admin.orders.fulfillments.new') && !request()->query('override-method')) disabled @endif>
+                            @if (isset($fulfillment) && !$fulfillment->isOpen()) disabled @endif>
                             <option value="">Manual</option>
                             @foreach ($services as $carrier => $group)
                                 @foreach ($group as $key => $item)
-                                    <option data-courier="{{ $carrier }}" value="{{ $key }}" class="hidden" @if ($selectedService === $key) selected @endif>
+                                    <option data-courier="{{ $carrier }}" value="{{ $key }}" class="hidden"
+                                        @if ($selectedService === $key) selected @endif>
                                         {{ $item }}
                                     </option>
                                 @endforeach
@@ -27,9 +28,8 @@
                 <div class="px-2 mb-4">
                     <label for="courier-connector" class="block">Connector</label>
                     <div class="select w-full">
-
                         <select id="courier-connector" name="connector" class="w-full"
-                        @if ((isset($fulfillment) || Route::currentRouteName() === 'admin.orders.fulfillments.new') && !request()->query('override-method')) disabled @endif>
+                            @if (isset($fulfillment) && !$fulfillment->isOpen()) disabled @endif>
                             <option value="">Manual</option>
                             @foreach ($connectors as $carrier => $group)
                                 @foreach ($group as $key => $item)
@@ -46,7 +46,6 @@
         @endisset
     </div>
 </div>
-
 
 @push('scripts')
     <script>
