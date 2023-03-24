@@ -133,7 +133,7 @@ class CourierShipment extends Model
         $this->fulfillments->each->update([
             'tracking_code' => ($response ? $response->getTrackingNumber() : null) ?? '',
             'tracking_url' => ($response ? $response->getTrackingUrl() : null) ?? '',
-            'state' => Fulfillment::SUCCESSFUL
+            'state' => $this->driver::determineFulfillmentStatus()
         ]);
 
         $this->orders->each(function (Order $order) {
