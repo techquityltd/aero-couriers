@@ -16,6 +16,7 @@ use Aero\Fulfillment\Models\FulfillmentMethod;
 use Aero\Responses\ResponseBuilder;
 use Techquity\Aero\Couriers\BulkActions\CollectShipmentsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\CommitCourierShipmentsBulkAction;
+use Techquity\Aero\Couriers\BulkActions\CompletePendingFulfillments;
 use Techquity\Aero\Couriers\BulkActions\DeleteCourierConnectorsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\DeleteCourierServicesBulkAction;
 use Techquity\Aero\Couriers\Models\{CourierConnector, CourierService, CourierShipment, PendingLabel};
@@ -78,6 +79,10 @@ class CouriersServiceProvider extends ModuleServiceProvider
         AdminSlot::inject('orders.index.header.buttons', function ($_) {
             return view('couriers::slots.pending-labels');
         });
+
+        BulkAction::create(CompletePendingFulfillments::class, FulfillmentsResourceList::class)
+            ->title('Complete pending fulfillments')
+            ->permissions('fulfillments.view');
 
         $this->configureCourierManagerModule();
 
