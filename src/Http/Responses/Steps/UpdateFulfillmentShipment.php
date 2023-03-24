@@ -11,11 +11,11 @@ class UpdateFulfillmentShipment implements ResponseStep
     {
         $fulfillment = $builder->fulfillment;
 
-        if (
-            (isset($fulfillment->method) && $fulfillment->method->isCourier || $fulfillment->courierShipment) &&
-            !empty($builder->request->service) &&
-            !empty($builder->request->connector)
-        ) {
+        if (!isset($fulfillment->method) && $fulfillment->method->isCourier || !$fulfillment->courierShipment) {
+            return $next($builder);
+        }
+
+        if (!empty($builder->request->service) && !empty($builder->request->connector)) {
             $fulfillment->courierShipment->courierService()->associate($builder->request->service);
             $fulfillment->courierShipment->courierConnector()->associate($builder->request->connector);
             $fulfillment->courierShipment->save();
