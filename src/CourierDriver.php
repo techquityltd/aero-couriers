@@ -139,6 +139,14 @@ class CourierDriver extends FulfillmentDriver
     }
 
     /**
+     * Determine what status the fulfilment should be.
+     */
+    public static function determineFulfillmentStatus(): string
+    {
+        return Fulfillment::SUCCESSFUL;
+    }
+
+    /**
      * Make the fulfillment request.
      *
      * @return \Aero\Fulfillment\Contracts\Response

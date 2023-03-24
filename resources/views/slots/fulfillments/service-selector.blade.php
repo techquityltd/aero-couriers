@@ -161,8 +161,9 @@
                     disableCourierOptions();
                 @endif
 
-                @if($shipment->committed)
-                    toggleTrackingForm(false);
+                toggleTrackingForm(false);
+
+                @if($shipment->committed && $fulfillment->state === 'successful')
                     document.getElementById("tracking-code").disabled = true;
                     document.getElementById("tracking-url").disabled = true;
                 @endif
