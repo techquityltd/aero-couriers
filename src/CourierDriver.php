@@ -212,10 +212,12 @@ class CourierDriver extends FulfillmentDriver
 
                 } else {
                     $shipments->each(function ($shipment) {
-                        (new PendingLabel([
-                            'label' => $shipment->label,
-                            'admin_id' => $this->admin->id
-                        ]))->save();
+                        if ($shipment->label) {
+                            (new PendingLabel([
+                                'label' => $shipment->label,
+                                'admin_id' => $this->admin->id
+                            ]))->save();
+                        }
                     });
                 }
             });
