@@ -37,6 +37,9 @@ class CourierServicesResourceList extends AbstractResourceList
             ResourceListColumn::create('Description', function ($row) {
                 return $row->description;
             }),
+            ResourceListColumn::create('Group', function ($row) {
+                return $row->group;
+            }),
             ResourceListColumn::create('Carrier', function ($row) {
                 return $row->carrier;
             }),

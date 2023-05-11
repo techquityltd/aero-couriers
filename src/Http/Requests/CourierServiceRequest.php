@@ -24,7 +24,8 @@ class CourierServiceRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|max:255',
+            'name' => 'max:255',
+            'group' => 'max:255'
         ];
     }
 }

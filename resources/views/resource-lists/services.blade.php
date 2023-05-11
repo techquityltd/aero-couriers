@@ -8,7 +8,11 @@
                     @method('PUT')
                     <div class="w-1/5 mr-2">
                         <label class="block" for="name">Display Name</label>
-                        <input type="text" id="name" name="name" class="w-full" value="{{ old('name', $service->name) }}" required>
+                        <input type="text" id="name" name="name" class="w-full" value="{{ old('name', $service->name) }}">
+                    </div>
+                    <div class="w-1/5 ml-2">
+                        <label class="block" for="group">Group</label>
+                        <input type="text" id="group" name="group" class="w-full" value="{{ old('group', $service->group) }}">
                     </div>
                     <div class="w-1/5 flex items-end ml-2">
                         @can('couriers.manage-services')
