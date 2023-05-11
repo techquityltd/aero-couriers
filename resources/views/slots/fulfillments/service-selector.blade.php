@@ -10,11 +10,15 @@
                             @if (isset($fulfillment) && !$fulfillment->isOpen()) disabled @endif>
                             <option value="">Manual</option>
                             @foreach ($services as $carrier => $group)
-                                @foreach ($group as $key => $item)
-                                    <option data-courier="{{ $carrier }}" value="{{ $key }}" class="hidden"
-                                        @if ($selectedService === $key) selected @endif>
-                                        {{ $item }}
-                                    </option>
+                                @foreach ($group as $groupKey => $data)
+                                    <optgroup data-courier="{{ $carrier }}" label="{{ $groupKey }}">
+                                        @foreach ($data as $key => $item)
+                                            <option data-courier="{{ $carrier }}" value="{{ $key }}" class="hidden"
+                                                @if ($selectedService === $key) selected @endif>
+                                                {{ $item }}
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
                                 @endforeach
                             @endforeach
                         </select>
