@@ -17,6 +17,7 @@ class CourierService extends Model
     protected $fillable = [
         'name',
         'description',
+        'group',
         'carrier',
         'service_type',
         'service_code',
@@ -28,9 +29,19 @@ class CourierService extends Model
             ->orderBy('carrier')
             ->cursor()
             ->mapToGroups(fn ($service) => [$service->carrier => $service])
-            ->map(fn ($group) => $group->mapWithKeys(fn ($service) => [
-                $service->id => $service->name ?? $service->description
-            ]))
+            ->map(function ($group) {
+                return $group
+                    ->sortBy('service_code')
+                    ->mapToGroups(fn ($service) => [$service->group ?? 'Standard' => $service])
+                    ->map(function ($group) {
+                        return $group
+                            ->mapWithKeys(function ($service) {
+                                $name = $service->name ?? $service->description;
+                                return [$service->id => $service->service_code . ' - ' . $name];
+                            });
+                    })
+                    ->sortKeys();
+            })
             ->toArray();
     }
 }
