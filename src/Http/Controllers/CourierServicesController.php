@@ -50,7 +50,10 @@ class CourierServicesController extends Controller
                 if (!$model) {
                     $model = CourierService::create(Arr::add($service, 'carrier', $driver::NAME));
                 } else {
-                    $model->update(['description' => $service['description']]);
+                    $model->update([
+                        'description' => $service['description'],
+                        'group' => $service['group'] ?? 'Standard',
+                    ]);
                 }
             });
         });
