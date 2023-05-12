@@ -13,7 +13,7 @@
                                 @foreach ($group as $groupKey => $data)
                                     <optgroup data-courier="{{ $carrier }}" label="{{ $groupKey }}">
                                         @foreach ($data as $key => $item)
-                                            <option data-courier="{{ $carrier }}" value="{{ $key }}" class="hidden"
+                                            <option data-courier="{{ $carrier }}" value="{{ $key }}" class="hidden" disabled
                                                 @if ($selectedService === $key) selected @endif>
                                                 {{ $item }}
                                             </option>
@@ -71,8 +71,10 @@
                 availableServices.forEach(element => {
                     if (element.dataset.courier === courier) {
                         element.classList.remove("hidden");
+                        element.disabled = false;
                     } else {
                         element.classList.add("hidden");
+                        element.disabled = true;
                     }
                 });
             }
