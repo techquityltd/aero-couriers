@@ -30,6 +30,7 @@ return new class extends Migration
     {
         Schema::table('courier_services', function (Blueprint $table) {
             $table->dropColumn('courier_service_group_id');
+            $table->string('group')->nullable()->after('description');
         });
     }
 };
