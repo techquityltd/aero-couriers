@@ -11,8 +11,16 @@
                         <input type="text" id="name" name="name" class="w-full" value="{{ old('name', $service->name) }}">
                     </div>
                     <div class="w-1/5 ml-2">
-                        <label class="block" for="group">Group</label>
-                        <input type="text" id="group" name="group" class="w-full" value="{{ old('group', $service->group) }}">
+                        <label class="block" for="courier_service_group_id">Group</label>
+                        <select name="courier_service_group_id" id="courier_service_group_id" class="w-full" style="margin-top: 0.5rem">
+                            <option value=""></option>
+                            @foreach(\Techquity\Aero\Couriers\Models\CourierServiceGroup::all() as $group)
+                                <option value="{{ $group->id }}"
+                                        {{ $group->id === $service->courier_service_group_id ? 'selected' : '' }}>
+                                    {{ $group->name }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="w-1/5 flex items-end ml-2">
                         @can('couriers.manage-services')

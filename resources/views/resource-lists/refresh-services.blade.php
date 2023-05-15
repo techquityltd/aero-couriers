@@ -16,6 +16,11 @@
                         Deleted Services
                     </a>
                 </li>
+                <li>
+                    <a href="{{ route('admin.courier-manager.service-groups.index') }}" class="block py-2 px-4 font-normal">
+                        Service Groups
+                    </a>
+                </li>
             </ul>
         </template>
     </dropdown-menu>

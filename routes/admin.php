@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Techquity\Aero\Couriers\Http\Controllers\CourierConnectorsController;
+use Techquity\Aero\Couriers\Http\Controllers\CourierServiceGroupsController;
 use Techquity\Aero\Couriers\Http\Controllers\CourierServicesController;
 use Techquity\Aero\Couriers\Http\Controllers\CourierShipmentsController;
 use Techquity\Aero\Couriers\Http\Controllers\CourierCollectionsController;
@@ -31,6 +32,13 @@ Route::prefix('/courier/services')->middleware('can:couriers.manage-services')->
     Route::get('/{service}', [CourierServicesController::class, 'index'])->name('edit');
     Route::put('/{service}', [CourierServicesController::class, 'update'])->name('update');
     Route::post('/refresh', [CourierServicesController::class, 'store'])->name('store')->middleware('throttle:60,1');
+});
+
+Route::prefix('/courier/service-groups')->middleware('can:couriers.manage-services')->name('admin.courier-manager.service-groups.')->group(function () {
+    Route::get('/', [CourierServiceGroupsController::class, 'index'])->name('index');
+    Route::post('/', [CourierServiceGroupsController::class, 'store'])->name('store');
+    Route::get('/{group}', [CourierServiceGroupsController::class, 'index'])->name('edit');
+    Route::put('/{group}', [CourierServiceGroupsController::class, 'update'])->name('update');
 });
 
 Route::prefix('/courier/collections')->middleware('can:couriers.manage-collections')->name('admin.courier-manager.collections.')->group(function () {

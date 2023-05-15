@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Techquity\Aero\Couriers\Http\Requests\CourierServiceRequest;
 use Techquity\Aero\Couriers\Models\CourierService;
+use Techquity\Aero\Couriers\Models\CourierServiceGroup;
 use Techquity\Aero\Couriers\ResourceLists\CourierServicesResourceList;
 use Techquity\Aero\Couriers\Traits\UsesCourierDriver;
 
@@ -41,6 +42,9 @@ class CourierServicesController extends Controller
             resolve($driver)->getServices()->each(function ($service) use ($driver) {
                 $service['service_type'] = isset($service['service_type']) ? $service['service_type'] : $service['service_code'];
 
+                $service['courier_service_group_id'] =
+                    isset($service['group']) ? CourierServiceGroup::firstOrCreate(['name' => $service['group']])->id : null;
+
                 $model = CourierService::query()
                     ->where('carrier', $driver::NAME)
                     ->where('service_type', $service['service_type'])
@@ -52,7 +56,7 @@ class CourierServicesController extends Controller
                 } else {
                     $model->update([
                         'description' => $service['description'],
-                        'group' => $service['group'] ?? 'Standard',
+                        'courier_service_group_id' => $model->courier_service_group_id ?? $service['courier_service_group_id'],
                     ]);
                 }
             });

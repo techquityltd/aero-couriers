@@ -17,11 +17,17 @@ class CourierService extends Model
     protected $fillable = [
         'name',
         'description',
+        'courier_service_group_id',
         'group',
         'carrier',
         'service_type',
         'service_code',
     ];
+
+    public function courierServiceGroup()
+    {
+        return $this->belongsTo(CourierServiceGroup::class);
+    }
 
     public function scopeDisplayAvailable($query)
     {
@@ -32,15 +38,17 @@ class CourierService extends Model
             ->map(function ($group) {
                 return $group
                     ->sortBy('service_code')
-                    ->mapToGroups(fn ($service) => [$service->group ?? 'Standard' => $service])
+                    ->mapToGroups(fn ($service) => [$service->courierServiceGroup ? $service->courierServiceGroup->sort : '0' => $service])
+                    ->sortKeys()
+                    ->flatten()
+                    ->mapToGroups(fn ($service) => [$service->courierServiceGroup ? $service->courierServiceGroup->name : 'Standard' => $service])
                     ->map(function ($group) {
                         return $group
                             ->mapWithKeys(function ($service) {
                                 $name = $service->name ?? $service->description;
                                 return [$service->id => $service->service_code . ' - ' . $name];
                             });
-                    })
-                    ->sortKeys();
+                    });
             })
             ->toArray();
     }
