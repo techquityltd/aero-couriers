@@ -3,15 +3,14 @@
 namespace Techquity\Aero\Couriers\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class CourierServiceRequest extends FormRequest
+class CourierServiceGroupRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return $this->user()->can('couriers.manage-services');
     }
@@ -24,8 +23,12 @@ class CourierServiceRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'max:255',
-            'courier_service_group_id' => 'nullable|exists:courier_service_groups,id'
+            'name' => [
+                'required',
+                'max:255',
+                Rule::unique('courier_service_groups', 'name')->ignore($this->group),
+            ],
+            'sort' => 'nullable|numeric',
         ];
     }
 }
