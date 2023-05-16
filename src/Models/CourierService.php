@@ -18,7 +18,6 @@ class CourierService extends Model
         'name',
         'description',
         'courier_service_group_id',
-        'group',
         'carrier',
         'service_type',
         'service_code',
