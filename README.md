@@ -23,3 +23,8 @@ A committed shipment means the shipment has been sent to the courier. A collecte
 There is no requirement to use this page to ship orders, the bulk action will be sufficient.
 
 ![image](https://user-images.githubusercontent.com/98423842/232491780-cc2492b9-d191-4c7c-97e5-f06771861f56.png)
+
+## To-Do
+- Add functionality to link courier shipments to a batch. When Ship Orders runs it should generate a new batch key and assign this to the selected orders
+- Add functionality to courier manager screen to view shipments by batch, with options to commit/collect a batch of shipments rather than one at a time. See order documents for an example of the concept
+- Move courier custom fields code (DPD and Parcelforce) to aero-couriers and add a slot to the view so individual courier packages can inject their custom fields
