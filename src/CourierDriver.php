@@ -112,6 +112,11 @@ class CourierDriver extends FulfillmentDriver
         });
     }
 
+    public function printLabels(): void
+    {
+
+    }
+
     /**
      * Get the the tracking url.
      */

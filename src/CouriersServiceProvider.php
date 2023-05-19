@@ -20,6 +20,7 @@ use Techquity\Aero\Couriers\BulkActions\CompletePendingFulfillments;
 use Techquity\Aero\Couriers\BulkActions\DeleteCourierConnectorsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\DeleteCourierServicesBulkAction;
 use Techquity\Aero\Couriers\Models\{CourierConnector, CourierService, CourierShipment, PendingLabel};
+use Techquity\Aero\Couriers\BulkActions\PrintLabelsBulkAction;
 use Techquity\Aero\Couriers\ResourceLists\CourierConnectorsResourceList;
 use Techquity\Aero\Couriers\ResourceLists\CourierServicesResourceList;
 use Techquity\Aero\Couriers\BulkActions\MergeCourierShipmentsBulkAction;
@@ -80,15 +81,13 @@ class CouriersServiceProvider extends ModuleServiceProvider
             return view('couriers::slots.pending-labels');
         });
 
-        BulkAction::create(CompletePendingFulfillments::class, FulfillmentsResourceList::class)
-            ->title('Complete pending fulfillments')
-            ->permissions('fulfillments.view');
-
         $this->configureCourierManagerModule();
 
         $this->configureFulfillmentMethodsSetup();
 
         $this->configureFulfillmentSetup();
+
+        $this->configureFulfillmentBulkActions();
     }
 
     /**
@@ -224,5 +223,16 @@ class CouriersServiceProvider extends ModuleServiceProvider
         $this->extendRequestForSelector(UpdateFulfillmentRequest::class);
 
         AdminOrderFulfillmentUpdate::extend(UpdateFulfillmentShipment::class);
+    }
+
+    protected function configureFulfillmentBulkActions(): void
+    {
+        BulkAction::create(CompletePendingFulfillments::class, FulfillmentsResourceList::class)
+            ->title('Complete pending fulfillments')
+            ->permissions('fulfillments.view');
+
+        BulkAction::create(PrintLabelsBulkAction::class, FulfillmentsResourceList::class)
+            ->title('Print labels')
+            ->permissions('fulfillments.view');
     }
 }
