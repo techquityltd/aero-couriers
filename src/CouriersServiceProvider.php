@@ -77,9 +77,7 @@ class CouriersServiceProvider extends ModuleServiceProvider
             }, 'orders');
         });
 
-        AdminSlot::inject('orders.index.header.buttons', function ($_) {
-            return view('couriers::slots.pending-labels');
-        });
+        $this->setupPendingLabelsDownloader();
 
         $this->configureCourierManagerModule();
 
@@ -234,5 +232,16 @@ class CouriersServiceProvider extends ModuleServiceProvider
         BulkAction::create(PrintLabelsBulkAction::class, FulfillmentsResourceList::class)
             ->title('Print labels')
             ->permissions('fulfillments.view');
+    }
+
+    /**
+     * Adds the view for pending labels so pending labels are automatically downloaded in the admin
+     */
+    protected function setupPendingLabelsDownloader(): void
+    {
+        $fn = fn ($_) => view('couriers::slots.pending-labels');
+
+        AdminSlot::inject('orders.index.header.buttons', $fn);
+        AdminSlot::inject('orders.fulfillments.index.header.buttons', $fn);
     }
 }

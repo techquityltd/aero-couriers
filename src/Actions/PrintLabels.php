@@ -15,7 +15,9 @@ class PrintLabels
             ->groupBy(fn ($shipment) => $shipment->courierConnector->id)
             ->each(function ($shipments) use ($admin) {
                 $driver = $this->getCourierDrivers()->get($shipments->first()->courierService->carrier);
-                (new $driver())->printLabels($shipments);
+                $driver = (new $driver())->setShipments($shipments);
+
+                $driver->printLabels($admin);
             });
 
         return true;
