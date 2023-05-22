@@ -11,6 +11,7 @@ use Aero\Fulfillment\Responses\FulfillmentResponse;
 use Illuminate\Support\Collection;
 use Techquity\Aero\Couriers\Actions\CommitShipments;
 use Techquity\Aero\Couriers\Models\CourierCollection;
+use Techquity\Aero\Couriers\Models\CourierConnector;
 use Techquity\Aero\Couriers\Models\CourierShipment;
 use Techquity\Aero\Couriers\Models\PendingLabel;
 use Illuminate\Database\Eloquent;
@@ -113,7 +114,15 @@ class CourierDriver extends FulfillmentDriver
     }
 
     /**
-     * Get the the tracking url.
+     * Print the labels for the given shipments
+     */
+    public function printLabels($admin)
+    {
+
+    }
+
+    /**
+     * Get the tracking url.
      */
     protected function getTrackingUrl(string $trackingCode): string
     {
@@ -222,5 +231,10 @@ class CourierDriver extends FulfillmentDriver
                 }
             });
         }
+    }
+
+    protected function getCourierConnector($name = null): CourierConnector
+    {
+        return CourierConnector::where('name', $name)->first();
     }
 }
