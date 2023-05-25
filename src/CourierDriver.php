@@ -214,18 +214,11 @@ class CourierDriver extends FulfillmentDriver
                     $fileName = $driver->generateCsvFileName();
                     $driver->generateCsv()->store($fileName);
 
-                    (new PendingLabel([
-                        'label' => $fileName,
-                        'admin_id' => $this->admin->id
-                    ]))->save();
-
+                    $this->createPendingLabel($fileName, $this->admin);
                 } else {
                     $shipments->each(function ($shipment) {
                         if ($shipment->label) {
-                            (new PendingLabel([
-                                'label' => $shipment->label,
-                                'admin_id' => $this->admin->id
-                            ]))->save();
+                            $this->createPendingLabel($shipment->label, $this->admin);
                         }
                     });
                 }
@@ -236,5 +229,17 @@ class CourierDriver extends FulfillmentDriver
     protected function getCourierConnector($name = null): CourierConnector
     {
         return CourierConnector::where('name', $name)->first();
+    }
+
+    protected function createPendingLabel($filename = null, $admin = null)
+    {
+        if (! ($filename && $admin)) {
+            return;
+        }
+
+        (new PendingLabel([
+            'label' => $filename,
+            'admin_id' => $admin->id
+        ]))->save();
     }
 }
