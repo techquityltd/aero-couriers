@@ -2,14 +2,14 @@
 
 namespace Techquity\Aero\Couriers\BulkActions;
 
+use Aero\Admin\Jobs\BulkActionJob;
 use Aero\Admin\ResourceLists\FulfillmentsResourceList;
 use Aero\Fulfillment\Models\Fulfillment;
 use Illuminate\Support\Facades\Auth;
-use Techquity\Aero\Couriers\Abstracts\AbstractQueueableBulkAction;
 use Techquity\Aero\Couriers\Actions\PrintLabels;
 use Techquity\Aero\Couriers\Traits\UsesCourierDriver;
 
-class PrintLabelsBulkAction extends AbstractQueueableBulkAction
+class PrintLabelsBulkAction extends BulkActionJob
 {
     use UsesCourierDriver;
 

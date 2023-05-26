@@ -3,6 +3,7 @@
 namespace Techquity\Aero\Couriers\Actions;
 
 use Aero\Admin\Models\Admin;
+use Techquity\Aero\Couriers\Models\PendingLabel;
 use Techquity\Aero\Couriers\Traits\UsesCourierDriver;
 
 class PrintLabels
@@ -20,6 +21,6 @@ class PrintLabels
                 $driver->printLabels($admin);
             });
 
-        return true;
+        return PendingLabel::count() ? true : back()->with(['error' => 'Unable to find labels for the selected shipments']);
     }
 }
