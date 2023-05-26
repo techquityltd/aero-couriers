@@ -28,8 +28,8 @@
                 pauseLabelDownloader = pauseLabelDownloader + 5000;
             });
 
-            // Wait 1 second + the pause before getting more
-            await new Promise(resolve => setTimeout(resolve, 1000 + pauseLabelDownloader));
+            // Wait 3 second + the pause before getting more
+            await new Promise(resolve => setTimeout(resolve, 3000 + pauseLabelDownloader));
 
             downloadNextAvailableLabel();
         }
