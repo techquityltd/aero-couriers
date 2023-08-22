@@ -10,10 +10,13 @@ use Aero\Admin\Http\Responses\Configuration\{AdminFulfillmentMethodCreatePage, A
 use Aero\Admin\Http\Responses\Orders\{AdminOrderFulfillmentCreatePage, AdminOrderFulfillmentEditPage, AdminOrderFulfillmentStore, AdminOrderFulfillmentUpdate};
 use Aero\Admin\ResourceLists\FulfillmentsResourceList;
 use Aero\Admin\ResourceLists\OrdersResourceList;
+use Aero\Common\Facades\Settings;
 use Aero\Common\Providers\ModuleServiceProvider;
+use Aero\Common\Settings\SettingGroup;
 use Aero\Fulfillment\Models\Fulfillment;
 use Aero\Fulfillment\Models\FulfillmentMethod;
 use Aero\Responses\ResponseBuilder;
+use Illuminate\Console\Scheduling\Schedule;
 use Techquity\Aero\Couriers\BulkActions\CollectShipmentsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\CommitCourierShipmentsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\CompletePendingFulfillments;
@@ -21,6 +24,7 @@ use Techquity\Aero\Couriers\BulkActions\DeleteCourierConnectorsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\DeleteCourierServicesBulkAction;
 use Techquity\Aero\Couriers\Models\{CourierConnector, CourierService, CourierShipment, PendingLabel};
 use Techquity\Aero\Couriers\BulkActions\PrintLabelsBulkAction;
+use Techquity\Aero\Couriers\Commands\ClearOldData;
 use Techquity\Aero\Couriers\ResourceLists\CourierConnectorsResourceList;
 use Techquity\Aero\Couriers\ResourceLists\CourierServicesResourceList;
 use Techquity\Aero\Couriers\BulkActions\MergeCourierShipmentsBulkAction;
@@ -40,6 +44,15 @@ class CouriersServiceProvider extends ModuleServiceProvider
     {
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'couriers');
+
+        $this->commands([
+            ClearOldData::class
+        ]);
+
+        $this->app->booted(function () {
+            $schedule = $this->app->make(Schedule::class);
+            $schedule->command('couriers:cleardown')->dailyAt('03:00');
+        });
 
         // Add the permissions used for managing couriers...
         Permissions::add([
@@ -79,6 +92,8 @@ class CouriersServiceProvider extends ModuleServiceProvider
 
         $this->setupPendingLabelsDownloader();
 
+        $this->configureSettings();
+
         $this->configureCourierManagerModule();
 
         $this->configureFulfillmentMethodsSetup();
@@ -86,6 +101,13 @@ class CouriersServiceProvider extends ModuleServiceProvider
         $this->configureFulfillmentSetup();
 
         $this->configureFulfillmentBulkActions();
+    }
+
+    protected function configureSettings()
+    {
+        Settings::group('couriers', function (SettingGroup $group) {
+           $group->integer('log_retention_days')->default(14);
+        });
     }
 
     /**
