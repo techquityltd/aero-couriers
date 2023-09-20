@@ -23,6 +23,7 @@ use Techquity\Aero\Couriers\BulkActions\CompletePendingFulfillments;
 use Techquity\Aero\Couriers\BulkActions\DeleteCourierConnectorsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\DeleteCourierServicesBulkAction;
 use Techquity\Aero\Couriers\Models\{CourierConnector, CourierService, CourierShipment, PendingLabel};
+use Techquity\Aero\Couriers\BulkActions\PrintCourierShipmentLabelsBulkAction;
 use Techquity\Aero\Couriers\BulkActions\PrintLabelsBulkAction;
 use Techquity\Aero\Couriers\Commands\ClearOldData;
 use Techquity\Aero\Couriers\ResourceLists\CourierConnectorsResourceList;
@@ -128,6 +129,10 @@ class CouriersServiceProvider extends ModuleServiceProvider
             return view('couriers::resource-lists.manage');
         });
 
+        AdminSlot::inject('couriers.shipments.index.header.buttons', function ($_) {
+            return view('couriers::slots.pending-labels');
+        });
+
         // Add the refresh services link to the resource list services...
         AdminSlot::inject('couriers.services.index.header.buttons', function ($_) {
             return view('couriers::resource-lists.refresh-services');
@@ -153,6 +158,10 @@ class CouriersServiceProvider extends ModuleServiceProvider
             ->permissions('couriers.manage-shipments')
             ->confirm()
             ->confirmText('This will mark the selected shipments as collected and orders as dispatched!');
+
+        BulkAction::create(PrintCourierShipmentLabelsBulkAction::class, CourierShipmentsResourceList::class)
+            ->title('Print Shipment Labels')
+            ->permissions('couriers.manage-shipments');
 
         BulkAction::create(DeleteCourierConnectorsBulkAction::class, CourierConnectorsResourceList::class)
             ->title('Delete Connectors')
