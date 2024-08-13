@@ -11,9 +11,7 @@ class IncreasePasswordLengthOnCourierConnectors extends Migration
      */
     public function up(): void
     {
-        Schema::table('courier_connectors', function (Blueprint $table) {
-            $table->string('password', 1024)->change();
-        });
+        DB::statement("ALTER TABLE courier_connectors MODIFY COLUMN password VARCHAR(1024)");
     }
 
     /**
@@ -21,8 +19,6 @@ class IncreasePasswordLengthOnCourierConnectors extends Migration
      */
     public function down(): void
     {
-        Schema::table('courier_connectors', function (Blueprint $table) {
-            $table->string('password', 255)->change();
-        });
+        DB::statement("ALTER TABLE courier_connectors MODIFY COLUMN password VARCHAR(255)");
     }
 }
