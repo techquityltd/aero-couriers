@@ -32,7 +32,7 @@ abstract class AbstractResponse implements Response
     {
         $this->request = $request;
         $this->response = $response;
-        $this->array = json_decode($this->body(), true) ?? [];
+        $this->array = (array) json_decode($this->body(), true) ?? [];
     }
 
     /**
