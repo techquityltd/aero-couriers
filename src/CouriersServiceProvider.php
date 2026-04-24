@@ -38,6 +38,13 @@ class CouriersServiceProvider extends ModuleServiceProvider
 {
     use UsesCourierDriver;
 
+    public function register()
+    {
+        if (! $this->app->configurationIsCached()) {
+            $this->mergeConfigFrom(__DIR__.'/../config/couriers.php', 'aero-couriers');
+        }
+    }
+
     /**
      * Bootstrap the application services.
      */
@@ -171,9 +178,11 @@ class CouriersServiceProvider extends ModuleServiceProvider
             ->title('Delete Services')
             ->permissions('couriers.manage-services');
 
-        BulkAction::create(ShipOrdersBulkAction::class, OrdersResourceList::class)
-            ->title('Ship Orders')
-            ->permissions('couriers.manage-shipments');
+        if (config('aero-couriers.enable_ship_orders_bulk_action')) {
+            BulkAction::create(ShipOrdersBulkAction::class, OrdersResourceList::class)
+                ->title('Ship Orders')
+                ->permissions('couriers.manage-shipments');
+        }
     }
 
     /**
