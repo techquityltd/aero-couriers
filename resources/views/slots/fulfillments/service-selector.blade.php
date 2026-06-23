@@ -137,13 +137,16 @@
 
                 // Build the override link..
                 const fulfillmentMethodLabel = document.querySelector("label[for='fulfillment-method']");
+                const overrideFulfillmentMethods = {{ setting('couriers.override-fulfillment-methods') ? 1 : 0 }};
 
-                var overrideLink = document.createElement('a');
-                var linkText = document.createTextNode(@if(!request()->query('override-method'))"Override"@else"Default"@endif);
-                overrideLink.appendChild(linkText);
-                overrideLink.href = "{{ url()->current() }}" @if(!request()->query('override-method')) + "?override-method=true" @endif;
-                overrideLink.classList = "ml-2 text-xs font-thin underline"
-                fulfillmentMethodLabel.appendChild(overrideLink);
+                if (! overrideFulfillmentMethods) {
+                    var overrideLink = document.createElement('a');
+                    var linkText = document.createTextNode(@if(! request()->query('override-method'))"Override"@else"Default"@endif);
+                    overrideLink.appendChild(linkText);
+                    overrideLink.href = "{{ url()->current() }}" @if(!request()->query('override-method')) + "?override-method=true" @endif;
+                    overrideLink.classList = "ml-2 text-xs font-thin underline"
+                    fulfillmentMethodLabel.appendChild(overrideLink);
+                }
 
                 if (Object.keys(courierMethods).length) {
                     methodSelector.addEventListener("change", function(event) {

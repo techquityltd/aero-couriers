@@ -115,6 +115,9 @@ class CouriersServiceProvider extends ModuleServiceProvider
     {
         Settings::group('couriers', function (SettingGroup $group) {
            $group->integer('log_retention_days')->default(14);
+           $group->boolean('override-fulfillment-methods')
+               ->default(false)
+               ->hint('Default fulfillments to show all available methods');
         });
     }
 
@@ -228,7 +231,7 @@ class CouriersServiceProvider extends ModuleServiceProvider
             $this->attachCourierOptionsData($builder);
 
             // Allows us to completetly override the method...
-            if (request()->query('override-method')) {
+            if (request()->query('override-method') || setting('couriers.override-fulfillment-methods')) {
                 $builder->setData('methods', FulfillmentMethod::ordered()->get());
             }
 
