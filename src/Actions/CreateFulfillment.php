@@ -3,6 +3,7 @@
 namespace Techquity\Aero\Couriers\Actions;
 
 use Aero\Cart\Models\Order;
+use Aero\Cart\Models\OrderAddress;
 use Aero\Cart\Models\OrderItem;
 use Aero\Fulfillment\Models\Fulfillment;
 use Aero\Fulfillment\Models\FulfillmentAddress;
@@ -48,20 +49,20 @@ class CreateFulfillment
     /**
      * Create a new Create Fulfillment instance.
      */
-    public function __construct(Order $order)
+    public function __construct(Order $order, ?OrderAddress $shippingAddress = null)
     {
+        $shippingAddress = $shippingAddress ?? $order->shippingAddress;
+
         $this->fulfillment = new Fulfillment([
             'state' => (new CourierDriver())->getDefaultState(),
         ]);
 
-        $this->fulfillment->mobile = $order->shippingAddress->mobile ?? $order->shippingAddress->phone;
+        $this->fulfillment->mobile = $shippingAddress->mobile ?? $shippingAddress->phone;
         $this->fulfillment->email = $order->email;
 
         $this->order = $order;
 
-        $this->fulfillmentAddress = FulfillmentAddress::create(
-            $this->order->shippingAddress->toFulfillmentAddress()
-        );
+        $this->fulfillmentAddress = FulfillmentAddress::create($shippingAddress->toFulfillmentAddress());
     }
 
     /**
